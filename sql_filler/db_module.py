@@ -6,23 +6,27 @@ from os import getenv
 load_dotenv()
 
 
-def get_connection(dbname=None):
+def get_connection(dbname=None, username=None):
     if not dbname:
         dbname = getenv("SQLALCHEMY_DATABASE_URI")
+    if not username:
+        username = getenv("SQLALCHEMY_USERNAME")
     try:
-        conn = connect(f"dbname={dbname}")
+        conn = connect(f"dbname={dbname} user={username}")
     except OperationalError:
         # TODO log this
-        print(f"Could not connect to {dbname} (dbmodule.py:get_connection)")
+        print(f"Could not connect to {username}@{dbname} (dbmodule.py:get_connection)")
         return None
     cur = conn.cursor()
     return conn, cur
 
 
-def test_connection(dbname=None):
+def test_connection(dbname=None, username=None):
     try:
-        conn = get_connection(dbname)
-        if conn:
+        conn, cur = get_connection(dbname=dbname, username=username)
+        if conn and cur:
+            cur.close()
+            conn.close()
             return True
     except OperationalError:
         pass

@@ -1,5 +1,5 @@
 from tkinter import Frame, Menu, ttk, Button, NSEW, Label
-from sql_filler.UI.utils import get_container
+from sql_filler.ui.utils import get_container
 
 
 def get_main_frame(master):

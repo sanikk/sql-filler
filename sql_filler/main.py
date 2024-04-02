@@ -1,5 +1,7 @@
-from UI.ui import UI
+from ui.ui import UI
+from services.postgresservice import PostgresService
 
-
-ui = UI()
+pos = PostgresService()
+ui = UI(pos=pos)
 ui.mainloop()
+

@@ -1,10 +1,10 @@
 from tkinter import Label, Entry, Button
-from sql_filler.db_module import test_connection
-from sql_filler.UI.utils import get_container
+from sql_filler.ui.utils import get_container
+from sql_filler.services.postgresservice import PostgresService, test_connection
 
 
 def get_account_frame(master=None):
-    # TODO fix this file next
+    # TODO fix this file next, 2 tabs(connect, unconnected), switcher
     account_container = get_container(text="SQL connection", master=master)
 
     Label(master=account_container, text="Username").grid(row=1, column=0)
@@ -27,14 +27,3 @@ def get_account_frame(master=None):
     return account_container
 
 
-def _fill_connected_frame(account_container, root):
-    Label(master=account_container, text='Connected to').grid(row=1, column=0, columnspan=2)
-    Label(master=account_container, text=f'{root.get_username()}@{root.get_dbname()}').grid(row=1, column=2,
-                                                                                            columnspan=2)
-
-    def disconnect():
-        root.connect(None, None)
-        root.set_account_frame()
-
-    Button(master=account_container, text="Disconnect", command=disconnect).grid(row=1, column=4)
-    return account_container
