@@ -1,7 +1,7 @@
 from tkinter import Label, Frame
 
 
-def get_container(text=None, master=None, columnspan=1, rowspan=1):
+def get_container(text=None, master=None, columnspan=1, rowspan=1, **kwargs):
     container = Frame(master=master, highlightthickness=5, highlightbackground='yellow')
     if text:
         Label(master=container, text=text, font='Calibri 22').grid(row=0, column=0, columnspan=columnspan,

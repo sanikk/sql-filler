@@ -1,6 +1,6 @@
-from tkinter import Label, Entry, Button
+from tkinter import Label, Entry, Button, ttk
 from sql_filler.ui.utils import get_container
-from sql_filler.services.postgresservice import PostgresService, test_connection
+from sql_filler.services.postgresservice import test_connection
 
 
 def get_account_frame(master=None):
