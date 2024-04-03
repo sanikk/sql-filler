@@ -13,12 +13,12 @@ class UI(Tk):
         self.geometry('800x600')
         self.title('SQL Filler')
 
-        self.dbname = StringVar(self)
-        self.username = StringVar(self)
+        self.__dbname = None
+        self.__username = None
 
         self._main_label = get_main_label(self)
         self._account_frame = get_account_frame(master=self)
-        self._table_frame = get_table_frame(master=self, dbnamevar=self.dbname, usernamevar=self.username)
+        self._table_frame = get_table_frame(master=self)
         self._work_frame = get_main_frame(master=self)
 
         self.layout()
@@ -35,12 +35,18 @@ class UI(Tk):
         self.rowconfigure(index=3, weight=5, minsize=300)
 
     def connect(self, username, dbname):
-        self.dbname.set(dbname)
-        self.username.set(username)
+        self.__dbname = dbname
+        self.__username = username
 
     def disconnect(self):
-        self.dbname.set('')
-        self.username.set('')
+        self.__dbname = ''
+        self.__username = ''
+
+    def get_dbname(self):
+        return self.__dbname
+
+    def is_connected(self):
+        return self.__dbname and self.__username
 
     def try_connection(self, username, dbname):
         print(f"AppFrame/try_connection {self.master=}, {self.winfo_parent()=}")
