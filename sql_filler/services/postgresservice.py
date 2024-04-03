@@ -23,3 +23,6 @@ class PostgresService:
 
     def is_connected(self):
         return self.__dbname is not None and self.__username is not None
+
+    def get_connection(self):
+        return self.__dbname, self.__username
