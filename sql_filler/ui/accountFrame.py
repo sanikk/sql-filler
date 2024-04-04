@@ -53,10 +53,3 @@ class AccountFrame(Frame):
         container = get_container(master=self, width=400, height=300, **kwargs)
         container.grid(**self.connection_tab_position, sticky=EW)
         return container
-
-
-
-
-
-
-

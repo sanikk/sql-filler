@@ -12,3 +12,5 @@ def get_container(master=None, text=None, columnspan=1, rowspan=1, *args, **kwar
 def get_main_label(master=None):
     main_label = Label(master=master, text='SQL Filler', fg='purple', font='Calibri 24')
     return main_label
+
+

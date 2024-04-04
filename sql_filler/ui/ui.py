@@ -8,13 +8,13 @@ from sql_filler.ui.utils import get_main_label
 class UI(Tk):
     def __init__(self, master=None, pos=None):
         Tk.__init__(self, master)
-        self.__postgresservice = pos
+        self._postgresservice = pos
 
         self.geometry('800x600')
         self.title('SQL Filler')
 
-        self.__dbname = None
-        self.__username = None
+        self._dbname = None
+        self._username = None
 
         self._main_label = get_main_label(master=self)
         self._account_frame = AccountFrame(master=self)
@@ -34,17 +34,14 @@ class UI(Tk):
         self.rowconfigure(index=2, weight=1, minsize=200)
         self.rowconfigure(index=3, weight=5, minsize=300)
 
-    def connect(self, username, dbname):
-        self.__dbname = dbname
-        self.__username = username
-
-    def disconnect(self):
-        self.__dbname = ''
-        self.__username = ''
-
-    def get_dbname(self):
-        return self.__dbname
+    def get_connection_info(self):
+        return self._postgresservice.connection_info()
 
     def is_connected(self):
-        return self.__dbname and self.__username
+        """
+        Check if there is a valid dbname and a valid username saved in UI.
+        DOES NOT RETURN A CONNECTION. JUST CHECKS IF THOSE TWO CLASS VARIABLES HAVE BEEN SET.
 
+        :return: True if the dbname and username exist.
+        """
+        return self._postgresservice.is_connected()
