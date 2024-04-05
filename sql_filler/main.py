@@ -1,8 +1,9 @@
 from ui.ui import UI
 from services.postgresservice import PostgresService
+from services.data_service import DataService
 
 pos = PostgresService()
-
-ui = UI(pos=pos)
+dataservice = DataService(pos)
+ui = UI(dataservice=dataservice)
 ui.mainloop()
 
