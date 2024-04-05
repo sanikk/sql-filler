@@ -1,4 +1,5 @@
 from tkinter import Tk, EW
+
 from sql_filler.ui.accountFrame import AccountFrame
 from sql_filler.ui.tableFrame import get_table_frame
 from sql_filler.ui.mainFrame import get_main_frame
@@ -6,9 +7,9 @@ from sql_filler.ui.utils import get_main_label
 
 
 class UI(Tk):
-    def __init__(self, master=None, pos=None):
+    def __init__(self, master=None, dataservice=None):
         Tk.__init__(self, master)
-        self._postgresservice = pos
+        self._data_service = dataservice
 
         self.geometry('800x600')
         self.title('SQL Filler')
@@ -35,13 +36,13 @@ class UI(Tk):
         self.rowconfigure(index=3, weight=5, minsize=300)
 
     def get_connection_info(self):
-        return self._postgresservice.connection_info()
+        """Return dbname and username from postgresservice"""
+        return self._data_service.get_connection_credentials()
 
     def is_connected(self):
         """
-        Check if there is a valid dbname and a valid username saved in UI.
-        DOES NOT RETURN A CONNECTION. JUST CHECKS IF THOSE TWO CLASS VARIABLES HAVE BEEN SET.
+        Check if there is a valid dbname and a valid username saved in postgresservice.
 
-        :return: True if the dbname and username exist.
+        :return: True if the service's dbname and username are set.
         """
-        return self._postgresservice.is_connected()
+        return self._data_service.is_connected()
