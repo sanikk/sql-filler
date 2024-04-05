@@ -16,8 +16,8 @@ class AccountFrame(Frame):
 
     def connect(self):
         self._connected_tab = self.connected_tab(master=self)
-        self._connected_tab.grid(self._connection_tab_position_params)
         self._unconnected_tab.grid_forget()
+        self._connected_tab.grid(self._connection_tab_position_params)
 
     def disconnect(self):
         self._connected_tab.destroy()

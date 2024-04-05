@@ -26,6 +26,9 @@ class PostgresService:
     def get_tab2_info(self):
         return self._get_information_schema_columns()
 
+    def get_connection_credentials(self):
+        return self._dbname, self._username
+
     # internal methods
     def _get_information_schema_columns(self):
         sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
@@ -35,6 +38,8 @@ class PostgresService:
         if test_connection(dbname=dbname, username=username):
             self._dbname = dbname
             self._username = username
+            return True
+        return False
 
     def _execute_sql(self, sql_string: str, params=None):
         with self._get_connection() as conn:
