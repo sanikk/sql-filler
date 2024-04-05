@@ -1,24 +1,27 @@
-from tkinter import Label, Entry, Button, Frame, NSEW, EW
+from tkinter import Label, Entry, Button, Frame, EW
 from sql_filler.ui.utils import get_container
 from sql_filler.services.postgresservice import test_connection
 
 
 class AccountFrame(Frame):
-    def __init__(self, master=None, *args, **kwargs):
-        Frame.__init__(self, *args, **kwargs)
-        self.connection_tab_position = {'row': 1, 'column': 1}
-        self.unconnected = self.unconnected_tab()
-        self.connected = None
-        self.unconnected.grid(self.connection_tab_position, sticky=EW)
+    def __init__(self, master=None, data_service=None):
+        """ tän master on Ui(Tk)"""
+        Frame.__init__(self)
+        # inject data service here?
+        self._data_service = data_service
+        self._connection_tab_position_params = {'row': 1, 'column': 1, 'sticky': 'EW'}
+        self._unconnected_tab = self.unconnected_tab()
+        self._unconnected_tab.grid(self._connection_tab_position_params)
+        self._connected_tab = None
 
     def connect(self):
-        self.connected = self.connected_tab(master=self)
-        self.connected.grid(self.connection_tab_position, sticky=EW)
-        self.unconnected.grid_forget()
+        self._connected_tab = self.connected_tab(master=self)
+        self._connected_tab.grid(self._connection_tab_position_params)
+        self._unconnected_tab.grid_forget()
 
     def disconnect(self):
-        self.connected.destroy()
-        self.unconnected.grid(**self.connection_tab_position, sticky=EW)
+        self._connected_tab.destroy()
+        self._unconnected_tab.grid(self._connection_tab_position_params)
 
     def unconnected_tab(self, master=None) -> Frame:
         container = self.get_tab()
@@ -33,7 +36,7 @@ class AccountFrame(Frame):
         def connect():
             new_dbname = database_name_entry.get()
             new_username = database_username_entry.get()
-            if test_connection(dbname=new_dbname, username=new_username):
+            if self._data_service.try_to_set_connection_info(dbname=new_dbname, username=new_username):
                 self.connect()
 
         Button(master=container, text="Connect", command=connect).grid(row=1, column=1, rowspan=4, sticky=EW)
@@ -41,7 +44,8 @@ class AccountFrame(Frame):
 
     def connected_tab(self, master=None) -> Frame:
         container = self.get_tab(text='Connected to')
-        Label(master=container, text=f'').grid(row=1, column=0, sticky=EW)
+        dbname, username = self._data_service.get_connection_credentials()
+        Label(master=container, text=f'{username}@{dbname}').grid(row=1, column=0, sticky=EW)
 
         def disconnect():
             self.disconnect()
@@ -51,5 +55,5 @@ class AccountFrame(Frame):
 
     def get_tab(self, **kwargs):
         container = get_container(master=self, width=400, height=300, **kwargs)
-        container.grid(**self.connection_tab_position, sticky=EW)
+        container.grid(self._connection_tab_position_params, sticky=EW)
         return container

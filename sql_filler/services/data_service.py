@@ -2,13 +2,13 @@ class DataService:
     """
     Not sure this layer will be needed. Just passes signals from ui to postgresservice.
 
-    UI interfaces with this.
+    UI frames interface with this now?
     """
     def __init__(self, postgresservice):
         self._postgresservice = postgresservice
 
     def try_to_set_connection_info(self, dbname: str, username: str) -> bool:
-        if dbname and username and self._postgresservice.test_connection(dbname, username):
+        if dbname and username and self._postgresservice.first_connection(dbname, username):
             return True
         return False
 

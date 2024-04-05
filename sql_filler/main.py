@@ -3,7 +3,7 @@ from services.postgresservice import PostgresService
 from services.data_service import DataService
 
 pos = PostgresService()
-dataservice = DataService(pos)
-ui = UI(dataservice=dataservice)
+data_service = DataService(pos)
+ui = UI(data_service=data_service)
 ui.mainloop()
 
