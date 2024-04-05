@@ -13,6 +13,13 @@ class PostgresService:
             return True
         return False
 
+    def disconnect(self):
+        self._dbname = None
+        self._username = None
+
+    def is_connected(self):
+        return self._dbname is not None and self._username is not None
+
     def get_tab1_info(self):
         return self._get_information_schema_columns()
 
