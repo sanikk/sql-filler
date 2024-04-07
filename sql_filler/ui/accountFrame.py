@@ -1,13 +1,10 @@
 from tkinter import Label, Entry, Button, Frame, EW
 from sql_filler.ui.utils import get_container
-from sql_filler.services.postgresservice import test_connection
 
 
-class AccountFrame(Frame):
+class AccountFrame:
     def __init__(self, master=None, data_service=None):
-        """ tän master on Ui(Tk)"""
-        Frame.__init__(self)
-        # inject data service here?
+        self.frame = get_container(master=master)
         self._data_service = data_service
         self._connection_tab_position_params = {'row': 1, 'column': 1, 'sticky': 'EW'}
         self._unconnected_tab = self.unconnected_tab()
@@ -15,7 +12,7 @@ class AccountFrame(Frame):
         self._connected_tab = None
 
     def connect(self):
-        self._connected_tab = self.connected_tab(master=self)
+        self._connected_tab = self.connected_tab()
         self._unconnected_tab.grid_forget()
         self._connected_tab.grid(self._connection_tab_position_params)
 
@@ -38,7 +35,6 @@ class AccountFrame(Frame):
             new_username = database_username_entry.get()
             if self._data_service.try_to_set_connection_info(dbname=new_dbname, username=new_username):
                 self.connect()
-
         Button(master=container, text="Connect", command=connect).grid(row=1, column=1, rowspan=4, sticky=EW)
         return container
 
@@ -49,11 +45,10 @@ class AccountFrame(Frame):
 
         def disconnect():
             self.disconnect()
-
         Button(master=container, text="Disconnect", command=disconnect).grid(row=2, column=0, sticky=EW)
         return container
 
     def get_tab(self, **kwargs):
-        container = get_container(master=self, width=400, height=300, **kwargs)
+        container = get_container(master=self.frame, width=400, height=300, **kwargs)
         container.grid(self._connection_tab_position_params, sticky=EW)
         return container

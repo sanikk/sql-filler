@@ -22,7 +22,7 @@ class UI(Tk):
 
     def layout(self):
         self._main_label.grid(row=0, column=0, columnspan=2)
-        self._account_frame.grid(row=1, column=0, sticky=EW)
+        self._account_frame.frame.grid(row=1, column=0, sticky=EW)
         self._table_frame.grid(row=2, column=0)
         self._work_frame.grid(row=1, column=1, rowspan=2)
         self.columnconfigure(index=0, weight=1, uniform='left', minsize=200)
