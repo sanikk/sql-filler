@@ -36,8 +36,8 @@ def test_connection(dbname=None, username=None):
 
 
 def _clean_connection_string(string: str):
-    # allowed characters a-z, A-Z, 0-9, _, :, (, )
+    # allowed characters a-z, A-Z, 0-9, _
     # a-z0-9_ allowed in table names
     # you need : for casting, () for obv. reasons
-    exp = r'^[a-zA-Z0-9_():\s]+$'
+    exp = r'^[a-zA-Z0-9_]+$'
     return re.match(exp, string)
