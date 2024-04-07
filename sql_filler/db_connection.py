@@ -1,39 +1,19 @@
 from psycopg2 import connect, OperationalError
-
-
-def _stupid_connection_string_checker(input_string: str):
-    """Checks if the input_string has only letters and digits and underscores."""
-    # TODO fix this!
-    if not input_string:
-        return False
-    for character in input_string:
-        # These should be alphabets, digits or underscores
-        if character.isdigit() or character.isalpha() or character == '_':
-            continue
-        return False
-    return True
-
-
-def _check_connection_info(dbname, username):
-    if not _stupid_connection_string_checker(dbname):
-        return False
-    if not _stupid_connection_string_checker(username):
-        return False
-    return True
+import re
 
 
 def get_connection(dbname, username):
     """
     Return connection with params dbname and username.
-
     Validation of connection string happens here!
 
     :param dbname:
     :param username:
-    :return: connection
-             None
+    :return: connection or None
     """
-    if not _check_connection_info(dbname, username):
+    dbname = _clean_connection_string(dbname)
+    username = _clean_connection_string(username)
+    if not dbname or not username:
         return None
     try:
         conn = connect(f"dbname={dbname} user={username}")
@@ -53,3 +33,11 @@ def test_connection(dbname=None, username=None):
     except OperationalError:
         pass
     return False
+
+
+def _clean_connection_string(string: str):
+    # allowed characters a-z, A-Z, 0-9, _, :, (, )
+    # a-z0-9_ allowed in table names
+    # you need : for casting, () for obv. reasons
+    exp = r'^[a-zA-Z0-9_():\s]+$'
+    return re.match(exp, string)
