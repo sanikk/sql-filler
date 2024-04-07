@@ -11,17 +11,15 @@ def get_connection(dbname, username):
     :param username:
     :return: connection or None
     """
-    dbname = _clean_connection_string(dbname)
-    username = _clean_connection_string(username)
-    if not dbname or not username:
-        return None
-    try:
-        conn = connect(f"dbname={dbname} user={username}")
-    except OperationalError:
-        # TODO log this
-        print(f"Could not connect to {username}@{dbname} (dbmodule.py:get_connection)")
-        return None
-    return conn
+    if _clean_connection_string(dbname) and _clean_connection_string(username):
+        try:
+            conn = connect(f"dbname={dbname} user={username}")
+        except OperationalError:
+            # TODO log this
+            print(f"Could not connect to {username}@{dbname} (dbmodule.py:get_connection)")
+            return None
+        return conn
+    return None
 
 
 def test_connection(dbname=None, username=None):

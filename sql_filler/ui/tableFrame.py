@@ -1,16 +1,11 @@
-from tkinter import Listbox, Frame, END, Scrollbar
+from tkinter import Listbox, Scrollbar
+
 from sql_filler.ui.utils import get_container
-from sql_filler.db_module import list_tables
 
 
-def get_table_frame(master=None):
-    container = get_container(master=master)
-
-    lb = Listbox(container, height=12, width=30)
-    Scrollbar(container, command=lb.yview).grid(row=0, column=1, sticky='W')
-    # if master.is_connected():
-    # tablenames = list_tables()
-    # lb.insert(END, *tablenames)
-    lb.grid(row=0, column=0)
-
-    return container
+class TableFrame:
+    def __init__(self, master=None):
+        self.frame = get_container(master=master)
+        self.lb = Listbox(self.frame, height=12, width=30)
+        Scrollbar(self.frame, command=self.lb.yview).grid(row=0, column=1, sticky='W')
+        self.lb.grid(row=0, column=0)
