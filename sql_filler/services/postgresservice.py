@@ -1,5 +1,6 @@
 from sql_filler.db_connection import get_connection, test_connection
 from sqlalchemy import text
+import re
 
 
 class PostgresService:
@@ -57,3 +58,11 @@ class PostgresService:
         if self._dbname and self._username:
             return get_connection(dbname=self._dbname, username=self._username)
         return None
+
+    def _clean_sql_string(string: str):
+        # allowed characters a-z, A-Z, 0-9, _, :, (, )
+        # a-z0-9_ allowed in table names
+        # you need : for casting, () for obv. reasons
+        # /s tabs, newline
+        exp = r'^[a-zA-Z0-9_():\s]+$'
+        return re.match(exp, string)
