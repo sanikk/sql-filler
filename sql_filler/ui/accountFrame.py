@@ -3,18 +3,19 @@ from sql_filler.ui.utils import get_container
 
 
 class AccountFrame:
-    def __init__(self, master=None, data_service=None):
+    def __init__(self, master=None, ui=None, data_service=None):
         self.frame = get_container(master=master)
-        self._data_service = data_service
         self._connection_tab_position_params = {'row': 1, 'column': 1, 'sticky': 'EW'}
         self._unconnected_tab = self.unconnected_tab()
         self._unconnected_tab.grid(self._connection_tab_position_params)
         self._connected_tab = None
+        self._ui = ui
 
     def connect(self):
         self._connected_tab = self.connected_tab()
         self._unconnected_tab.grid_forget()
         self._connected_tab.grid(self._connection_tab_position_params)
+        self._ui.update_table_frame()
 
     def disconnect(self):
         self._connected_tab.destroy()
@@ -33,14 +34,14 @@ class AccountFrame:
         def connect():
             new_dbname = database_name_entry.get()
             new_username = database_username_entry.get()
-            if self._data_service.try_to_set_connection_info(dbname=new_dbname, username=new_username):
+            if self._ui.try_first_connection(dbname=new_dbname, username=new_username):
                 self.connect()
         Button(master=container, text="Connect", command=connect).grid(row=1, column=1, rowspan=4, sticky=EW)
         return container
 
     def connected_tab(self, master=None) -> Frame:
         container = self.get_tab(text='Connected to')
-        dbname, username = self._data_service.get_connection_credentials()
+        dbname, username = self._ui.get_connection_credentials()
         Label(master=container, text=f'{username}@{dbname}').grid(row=1, column=0, sticky=EW)
 
         def disconnect():

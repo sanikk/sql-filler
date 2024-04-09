@@ -7,7 +7,7 @@ class DataService:
     def __init__(self, postgresservice):
         self._postgresservice = postgresservice
 
-    def try_to_set_connection_info(self, dbname: str, username: str) -> bool:
+    def try_first_connection(self, dbname: str, username: str) -> bool:
         if dbname and username and self._postgresservice.first_connection(dbname, username):
             return True
         return False
@@ -18,8 +18,11 @@ class DataService:
     def get_connection_credentials(self):
         return self._postgresservice.get_connection_credentials()
 
+    def get_table_names(self):
+        return self._postgresservice.get_table_names()
+
     def get_tab1_info(self):
-        return self._postgresservice.get_tab1_info()
+        return self._postgresservice.get_information_schema_columns()
 
     def get_tab2_info(self):
         return self._postgresservice.get_tab2_info()

@@ -9,6 +9,7 @@ class PostgresService:
         self._username = None
 
     # public methods
+    # Connection
     def first_connection(self, dbname=None, username=None):
         if self._test_connection(dbname=dbname, username=username):
             return True
@@ -21,19 +22,36 @@ class PostgresService:
     def is_connected(self):
         return self._dbname is not None and self._username is not None
 
-    def get_tab1_info(self):
-        return self._get_information_schema_columns()
-
-    def get_tab2_info(self):
-        return self._get_information_schema_columns()
-
     def get_connection_credentials(self):
         return self._dbname, self._username
 
-    # internal methods
-    def _get_information_schema_columns(self):
+    # tableFrame
+    def get_table_names(self):
+        if self._username:
+            # select * from pg_catalog.pg_tables
+            # schemaname |      tablename       | tableowner | tablespace | hasindexes | hasrules | hastriggers | rowsecurity
+            # ------------+----------------------+------------+------------+------------+----------+-------------+-------------
+            #  public     | account              | karpo      |            | t          | f        | t           | f
+            sql_string = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
+            if self._username and self._clean_sql_string(sql_string):
+                with self._get_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(sql_string, (self._username,))
+                        return cur.fetchall()
+
+    # Tab methods
+    def get_information_schema_columns(self):
         sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
-        return self._execute_sql(sql_string).fetchall()
+        if self._clean_sql_string(sql_string):
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql_string, (self._username,))
+                    return cur.fetchall()
+
+    def get_tab2_info(self):
+        return ''
+
+    # internal methods
 
     def _test_connection(self, dbname=None, username=None):
         if test_connection(dbname=dbname, username=username):
@@ -42,27 +60,15 @@ class PostgresService:
             return True
         return False
 
-    def _execute_sql(self, sql_string: str, params=None):
-        with self._get_connection() as conn:
-            with conn.cursor() as cur:
-                return cur.execute(self._clean_sql_string(sql_string, params))
-
-    def _clean_sql_string(self, sql_string: str, params=None):
-        """Cleans sql_string with <tool>.
-        Returns sqlalchemy TextClause now.
-        """
-        # TODO check text methods.
-        return text(sql_string), params
-
     def _get_connection(self):
         if self._dbname and self._username:
             return get_connection(dbname=self._dbname, username=self._username)
         return None
 
-    def _clean_sql_string(string: str):
-        # allowed characters a-z, A-Z, 0-9, _, :, (, )
+    def _clean_sql_string(self, string: str):
+        # allowed characters a-z, A-Z, 0-9, _, :, (, ), ., %
         # a-z0-9_ allowed in table names
         # you need : for casting, () for obv. reasons
         # /s tabs, newline
-        exp = r'^[a-zA-Z0-9_():\s]+$'
+        exp = r'^[a-zA-Z0-9_():\.\=\%\s]+$'
         return re.match(exp, string)
