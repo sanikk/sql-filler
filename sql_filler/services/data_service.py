@@ -1,9 +1,5 @@
 class DataService:
-    """
-    Not sure this layer will be needed. Just passes signals from ui to postgresservice.
 
-    UI frames interface with this now?
-    """
     def __init__(self, postgresservice):
         self._postgresservice = postgresservice
 

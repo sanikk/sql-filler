@@ -1,5 +1,4 @@
 from sql_filler.db_connection import get_connection, test_connection
-from sqlalchemy import text
 import re
 
 
@@ -49,6 +48,17 @@ class PostgresService:
                     return cur.fetchall()
 
     def get_tab2_info(self):
+        sql_string = """SELECT ic.table_name, ic.column_name, ic.ordinal_position, ic.column_default, ic.data_type
+            FROM information_schema.columns ic
+            WHERE columns.table_schema=\'public\'
+        """
+        if self._clean_sql_string(sql_string):
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql_string, (self._username,))
+                    return cur.fetchall()
+        validation = ('is_nullable, character_maximum_length, character_octet_length, numeric_precision, '
+                     'numeric_precision_radix, numeric_scale, datetime_precision, interval_type, interval_precision')
         return ''
 
     # internal methods

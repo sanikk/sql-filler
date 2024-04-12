@@ -44,6 +44,10 @@ class UI:
     def try_first_connection(self, dbname, username):
         return self._data_service.try_first_connection(dbname, username)
 
+    # NEW TODO FIXME luonnostelmaa
+    def insert_values(self, values):
+        self._data_service.insert_values(values)
+
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()

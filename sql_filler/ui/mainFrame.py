@@ -31,7 +31,12 @@ def settings_tab(master=None):
 
 
 def insert_tab(master=None):
+    # luonnostelma, mitään ei ole vielä toteutettu
     container = get_container(text="Insert into DB", master=master, width=800, height=550)
+    columns = self._ui.get_columns()
+    for col in columns:
+
+        pass
     return container
 
 
