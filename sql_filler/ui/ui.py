@@ -32,22 +32,31 @@ class UI:
         self.frame.rowconfigure(index=2, weight=1, minsize=200)
         self.frame.rowconfigure(index=3, weight=5, minsize=300)
 
-    def update_table_frame(self):
-        self._table.update_tables()
-
     def get_table_names(self):
         return self._data_service.get_table_names()
 
     def get_connection_credentials(self):
         return self._data_service.get_connection_credentials()
 
-    def try_first_connection(self, dbname, username):
-        return self._data_service.try_first_connection(dbname, username)
-
-    # NEW TODO FIXME luonnostelmaa
     def insert_values(self, values):
+        # FIXME
         self._data_service.insert_values(values)
 
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()
+
+    def connect(self):
+        dbname, username = self._account.get_entry_box_values()
+        if dbname and username and self._data_service.try_connection(dbname=dbname, username=username):
+            self._account.connect()
+            self._table.update_tables()
+            return True
+        return False
+
+    def disconnect(self):
+        self._data_service.disconnect()
+        self._account.disconnect()
+        self._table.update_tables()
+
+

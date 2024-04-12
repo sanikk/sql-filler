@@ -9,7 +9,7 @@ class PostgresService:
 
     # public methods
     # Connection
-    def first_connection(self, dbname=None, username=None):
+    def try_connection(self, dbname=None, username=None):
         if self._test_connection(dbname=dbname, username=username):
             return True
         return False
@@ -26,7 +26,7 @@ class PostgresService:
 
     # tableFrame
     def get_table_names(self):
-        if self._username:
+        if self.is_connected():
             # select * from pg_catalog.pg_tables
             # schemaname |      tablename       | tableowner | tablespace | hasindexes | hasrules | hastriggers | rowsecurity
             # ------------+----------------------+------------+------------+------------+----------+-------------+-------------
@@ -37,6 +37,7 @@ class PostgresService:
                     with conn.cursor() as cur:
                         cur.execute(sql_string, (self._username,))
                         return cur.fetchall()
+        return []
 
     # Tab methods
     def get_information_schema_columns(self):

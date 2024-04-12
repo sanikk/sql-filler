@@ -3,10 +3,13 @@ class DataService:
     def __init__(self, postgresservice):
         self._postgresservice = postgresservice
 
-    def try_first_connection(self, dbname: str, username: str) -> bool:
-        if dbname and username and self._postgresservice.first_connection(dbname, username):
+    def try_connection(self, dbname: str, username: str) -> bool:
+        if dbname and username and self._postgresservice.try_connection(dbname, username):
             return True
         return False
+
+    def disconnect(self):
+        self._postgresservice.disconnect()
 
     def is_connected(self):
         return self._postgresservice.is_connected()
