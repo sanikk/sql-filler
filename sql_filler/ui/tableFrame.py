@@ -16,4 +16,16 @@ class TableFrame:
     def update_tables(self):
         self.lb.delete(0, 'end')
         content = self._ui.get_table_names()
+        if not content:
+            content = []
         self.lb.insert('end', *content)
+
+    def grid(self, row, column):
+        """
+        Passthrough method ui->self.frame
+
+        :param row:
+        :param column:
+        :return:
+        """
+        self.frame.grid(row=row, column=column)

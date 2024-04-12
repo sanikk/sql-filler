@@ -23,8 +23,8 @@ class UI:
 
     def layout(self):
         self._main_label.grid(row=0, column=0, columnspan=2)
-        self._account.frame.grid(row=1, column=0, sticky=EW)
-        self._table.frame.grid(row=2, column=0)
+        self._account.grid(row=1, column=0, sticky=EW)
+        self._table.grid(row=2, column=0)
         self._work.grid(row=1, column=1, rowspan=2)
         self.frame.columnconfigure(index=0, weight=1, uniform='left', minsize=200)
         self.frame.columnconfigure(index=1, weight=10, uniform='right', minsize=200)

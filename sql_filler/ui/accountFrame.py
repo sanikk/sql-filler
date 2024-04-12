@@ -53,3 +53,13 @@ class AccountFrame:
         container = get_container(master=self.frame, width=400, height=300, **kwargs)
         container.grid(self._connection_tab_position_params, sticky=EW)
         return container
+
+    def grid(self, row, column, sticky):
+        """
+        Passthrough method for ui->self.frame
+        :param row:
+        :param column:
+        :param sticky:
+        :return:
+        """
+        self.frame.grid(row=row, column=column, sticky=sticky)
