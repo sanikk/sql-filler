@@ -53,3 +53,7 @@ class WorkFrame:
         :return:
         """
         self.frame.grid(row=row, column=column, rowspan=rowspan)
+
+    def selected_table_label(master=None):
+        return ttk.Label(master=master, text=f'Selected table {master}')
+
