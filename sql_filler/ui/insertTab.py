@@ -59,6 +59,8 @@ class InsertTab:
 
 
 class SingleColumnBox:
+    # not worth a class.
+    # we'll just do dynamic buttons and shit
     def __init__(self, master=None, column_data=None):
         self.frame = Frame(master=master)
 
