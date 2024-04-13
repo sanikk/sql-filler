@@ -62,6 +62,7 @@ class UI:
 
     def get_insert_tab(self):
         data = self._data_service.get_insert_tab()
+        return data
 
     # passthrough function for main.py so far
     def mainloop(self):
