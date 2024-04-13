@@ -10,7 +10,7 @@ class WorkFrame:
         self.insert_tab = None
         self.menu = self.get_menu_bar(ui=ui)
         self.menu.grid(row=0, column=0)
-        self.ui = ui
+        self._ui = ui
 
     def get_menu_bar(self, master=None, ui=None):
         if not master:

@@ -54,12 +54,14 @@ class PostgresService:
 
     def get_insert_tab_from_table(self):
         sql_string = """SELECT 
-        table_name, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
         FROM information_schema.columns 
         WHERE table_schema=\'public\' AND table_name=%s
         ORDER BY ordinal_position ASC
         """
         table_name = 'account'
+
+        # SELECT CAST('account'::regclass AS oid);
 
         # source https://cloud.google.com/spanner/docs/information-schema-pg
 

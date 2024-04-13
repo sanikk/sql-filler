@@ -25,7 +25,7 @@ class DataService:
             return [self._pretty_insert_tab_result(*result) for result in response]
         return None
 
-    def _pretty_insert_tab_result(self, table_name, column_name, ordinal_position, column_default, is_nullable,
+    def _pretty_insert_tab_result(self, table_name, table_id, column_name, ordinal_position, column_default, is_nullable,
                                   data_type, generation_expression, is_updatable, character_maximum_length):
         """
         Makes an object out of insert tab result.
@@ -44,6 +44,7 @@ class DataService:
         """
         return {
             'table_name': table_name,
+            'table_id': table_id,
             'column_name': column_name,
             'ordinal_position': ordinal_position,
             'column_default': column_default,

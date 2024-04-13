@@ -19,9 +19,10 @@ class InsertTab:
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
         for column_data in column_list:
-            new_label = Label(master=self.box_container, text=column_data["column_name"])
-            self._group.append(new_label)
-            new_label.grid(row=column_data["ordinal_position"], column=0)
+            new_box = self.make_single_column_box(column_data)
+            # new_label = Label(master=self.box_container, text=column_data["column_name"])
+            # self._group.append(new_label)
+            new_box.grid(row=column_data["ordinal_position"], column=0)
 
     def switch_selected_table(self):
         for box in self._group:
@@ -40,16 +41,22 @@ class InsertTab:
     def get_frame(self):
         return self.frame
 
+    def make_single_column_box(self, column_data):
+        """
+        Makes an expandable button+entry box from a column row.
 
-if __name__ == '__main__':
-    # data_service = TesterDataService()
-    testeri = tk.Tk()
-    testeri.title('testeri')
-    testeri.geometry('800x600')
+        :param column_data:
+        table_name, table_id, column_name, ordinal_position, column_default, is_nullable, data_type,
+        generation_expression, is_updatable, character_maximum_length
 
-    # it = InsertTab(master=testeri, ui=None, data_service_injection=data_service)
-    # it.get_frame().grid(row=0, column=0)
+        :return:
+        """
+        container = Frame(master=self.box_container)
 
-    testeri.mainloop()
+        def expand_this():
+            pass
+        ttk.Button(container, text=column_data["column_name"], command=expand_this).grid(row=0, column=0)
+        ttk.Entry(container, width=20).grid(row=0, column=1)
 
+        return container
 
