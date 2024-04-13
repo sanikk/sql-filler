@@ -1,33 +1,30 @@
+import tkinter
 from tkinter.ttk import Frame, Label, Entry, Button, Treeview, LabelFrame
 from sql_filler.ui.utils import get_container
-import tkinter as tk
+
 import tkinter.ttk as ttk
 
 
 class InsertTab:
-    # NEW TODO FIXME luonnostelmaa
     def __init__(self, master=None, ui=None):
-        self.frame = container = get_container(master=master, width=800, height=550)
-        Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
-        self.box_container = LabelFrame(master=self.frame, text="Table Columns", width=750, height=1200)
+        self.frame = get_container(master=master, width=800, height=550)
+        ttk.Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
+        self.box_container = ttk.LabelFrame(master=self.frame, text="Table Columns", width=750, height=1200)
         self.box_container.grid(row=2, column=0)
 
         self._ui = ui
         self._group = []
-        self._values = None
 
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
         for column_data in column_list:
-            new_box = self.make_single_column_box(column_data)
-            # new_label = Label(master=self.box_container, text=column_data["column_name"])
-            # self._group.append(new_label)
+            new_box = SingleColumnBox(master=self.box_container, column_data=column_data)
+            self._group.append(new_box)
             new_box.grid(row=column_data["ordinal_position"], column=0)
 
     def switch_selected_table(self):
         for box in self._group:
-            # kato mallia accountista
-            box.grid_forget()
+            box.hide()
         # bindaa tämä siihen selectediin tauluissa
         self.populate_insert_columns_tab()
 
@@ -60,3 +57,40 @@ class InsertTab:
 
         return container
 
+
+class SingleColumnBox:
+    def __init__(self, master=None, column_data=None):
+        self.frame = Frame(master=master)
+
+        def expand_this():
+            pass
+        self.button = ttk.Button(self.frame, text=column_data["column_name"], command=self.expand)
+        self.expanded_button = self.get_expanded_button(column_data=column_data)
+        self.value = ttk.Entry(self.frame, width=20)
+        self.button.grid(row=0, column=0)
+        self.value.grid(row=0, column=1)
+
+    def grid(self, row, column):
+        self.frame.grid(row=row, column=column)
+
+    def get_value(self):
+        return self.value.get()
+
+    def get_expanded_button(self, column_data=None):
+        container = Frame(self.frame)
+        txt = ''
+        for key in column_data.keys():
+            txt += f"{key}: {column_data[key]}\n"
+        ttk.Button(master=container, text=txt, command=self.shrink).grid(row=0, column=0)
+        return container
+
+    def expand(self):
+        self.button.grid_forget()
+        self.expanded_button.grid(row=0, column=0)
+
+    def shrink(self):
+        self.expanded_button.grid_forget()
+        self.button.grid(row=0, column=0)
+
+    def hide(self):
+        self.frame.grid_forget()
