@@ -20,9 +20,7 @@ class InsertTab:
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
         for column_data in column_list:
-            new_box = self.make_single_column_box(column_data)
-            self._group.append(new_box)
-            new_box.grid(row=column_data["ordinal_position"], column=0)
+            self.make_single_row(column_data=column_data)
 
     def switch_selected_table(self):
         for box in self._group:
@@ -39,49 +37,24 @@ class InsertTab:
     def get_frame(self):
         return self.frame
 
-    def make_single_column_box(self, column_data):
-        """
-        Makes an expandable button+entry box from a column row.
-
-        TODO change this and remove frame? let parent window arrange rows+columns?
-             shrink/expand might get weird but the window is huge with room to spend, so far.
-             oh yea, scrollbar!
-
-        :param column_data:
-        table_name, table_id, column_name, ordinal_position, column_default, is_nullable, data_type,
-        generation_expression, is_updatable, character_maximum_length
-
-        :return:
-        """
-        container = Frame(master=self.box_container)
-
-        def expand():
-            smallbutton.grid_forget()
-            bigbutton.grid(row=0, column=0)
-        smallbutton = ttk.Button(container, text=column_data["column_name"], command=expand)
-        smallbutton.grid(row=0, column=0)
-
-        def shrink():
-            bigbutton.grid_forget()
-            smallbutton.grid(row=0, column=0)
-        txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
-        bigbutton = ttk.Button(master=container, text=txt, command=shrink)
-        ttk.Entry(container, width=20).grid(row=0, column=1)
-
-        return container
-
     def make_single_row(self, master=None, column_data=None):
+        if not master:
+            master = self.box_container
 
         def expand():
             smallbutton.grid_forget()
             bigbutton.grid(row=0, column=0)
-        smallbutton = ttk.Button(self.box_container, text=column_data["column_name"], command=expand)
+
+        smallbutton = ttk.Button(master=master, text=column_data["column_name"], command=expand)
         smallbutton.grid(row=column_data["ordinal_position"], column=0)
 
         def shrink():
             bigbutton.grid_forget()
             smallbutton.grid(row=0, column=0)
+
         txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
-        bigbutton = ttk.Button(master=self.box_container, text=txt, command=shrink)
-        ttk.Entry(self.box_container, width=20).grid(row=column_data["ordinal_position"], column=1)
+        bigbutton = ttk.Button(master=master, text=txt, command=shrink)
+        valbox = ttk.Entry(self.box_container, width=20)
+        self._group.append(valbox)
+        valbox.grid(row=column_data["ordinal_position"], column=1)
 
