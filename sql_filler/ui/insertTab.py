@@ -53,9 +53,17 @@ class InsertTab:
         """
         container = Frame(master=self.box_container)
 
-        def expand_this():
-            pass
-        ttk.Button(container, text=column_data["column_name"], command=expand_this).grid(row=0, column=0)
+        def expand():
+            smallbutton.grid_forget()
+            bigbutton.grid(row=0, column=0)
+        smallbutton = ttk.Button(container, text=column_data["column_name"], command=expand)
+        smallbutton.grid(row=0, column=0)
+
+        def shrink():
+            bigbutton.grid_forget()
+            smallbutton.grid(row=0, column=0)
+        txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
+        bigbutton = ttk.Button(master=container, text=txt, command=shrink)
         ttk.Entry(container, width=20).grid(row=0, column=1)
 
         return container
