@@ -42,11 +42,37 @@ class PostgresService:
     # Tab methods
     def get_information_schema_columns(self):
         sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
-        if self._clean_sql_string(sql_string):
+        # if self._clean_sql_string(sql_string):
+        if True:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(sql_string, (self._username,))
-                    return cur.fetchall()
+                    res = cur.fetchall()
+                    print(f"{res[0]=}")
+                    return res
+                    # return cur.fetchall()
+
+    def get_insert_tab_from_table(self):
+        sql_string = """SELECT 
+        table_name, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+        FROM information_schema.columns 
+        WHERE table_schema=\'public\' AND table_name=%s
+        ORDER BY ordinal_position ASC
+        """
+        table_name = 'account'
+
+        # source https://cloud.google.com/spanner/docs/information-schema-pg
+
+        # useless_basic_columns_in_postgresql = 'table_catalog, table_schema, '
+        # useful_basic_columns_in_postgresql = 'table_name, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable'
+        # used_precision_columns_in_postgresql = 'character_maximum_length'
+
+        # sama_kaikissa_saman_luokan_eli_duplikaatti_info = 'numeric_precision, numeric_precision_radix, numeric_scale'
+
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql_string, (table_name,))
+                return cur.fetchall()
 
     def get_tab2_info(self):
         return ''

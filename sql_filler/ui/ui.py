@@ -57,6 +57,12 @@ class UI:
         values = []
         self._data_service.insert_values(values)
 
+    def switch_selected_table(self):
+        self._work.switch_selected_table()
+
+    def get_insert_tab(self):
+        data = self._data_service.get_insert_tab()
+
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()
