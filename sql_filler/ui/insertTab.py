@@ -1,7 +1,6 @@
-from tkinter.ttk import Frame, Label, Entry, Button, Treeview, LabelFrame, Frame, Scrollbar
+from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar
+from tkinter import Canvas
 from sql_filler.ui.utils import get_container
-import tkinter as tk
-import tkinter.ttk as ttk
 
 
 class InsertTab:
@@ -9,7 +8,7 @@ class InsertTab:
         self.frame = get_container(master=master, width=800, height=550)
 
         self.scrollbar = Scrollbar(master=self.frame)
-        self.scrollable = tk.Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
+        self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.scrollable.yview)
         self.scrollable.grid(row=1, column=1)
         self.scrollbar.grid(row=1, column=2, sticky='NS')
@@ -18,6 +17,7 @@ class InsertTab:
         self.box_container.columnconfigure(0, weight=3) # big/small button
         self.box_container.columnconfigure(1, weight=1) # entry box
         self.box_container.grid(row=2, column=0)
+
         # Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
 
         self._ui = ui
@@ -52,7 +52,7 @@ class InsertTab:
             smallbutton.grid_forget()
             bigbutton.grid(row=0, column=0)
 
-        smallbutton = ttk.Button(master=master, text=column_data["column_name"], command=expand)
+        smallbutton = Button(master=master, text=column_data["column_name"], command=expand)
         smallbutton.grid(row=column_data["ordinal_position"], column=0)
 
         def shrink():
@@ -60,12 +60,9 @@ class InsertTab:
             smallbutton.grid(row=0, column=0)
 
         txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
-        bigbutton = ttk.Button(master=master, text=txt, command=shrink)
-        valbox = ttk.Entry(self.box_container, width=20)
+        bigbutton = Button(master=master, text=txt, command=shrink)
+        valbox = Entry(self.box_container, width=20)
         valbox.grid(row=column_data["ordinal_position"], column=1)
-
-    def _draw_scrollbar(self):
-        pass
 
     def _reset_scrollregion(self):
         # might need the bbox one too
