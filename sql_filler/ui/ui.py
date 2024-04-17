@@ -61,8 +61,8 @@ class UI:
         self._work.switch_selected_table()
 
     def get_insert_tab(self):
-        data = self._data_service.get_insert_tab()
-        return data
+        table_number = self._table.get_selected_table()
+        return self._data_service.get_insert_tab(table_number=table_number)
 
     # passthrough function for main.py so far
     def mainloop(self):

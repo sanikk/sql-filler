@@ -1,35 +1,38 @@
-from tkinter.ttk import Frame, Label, Entry, Button, Treeview, LabelFrame
+from tkinter.ttk import Frame, Label, Entry, Button, Treeview, LabelFrame, Frame, Scrollbar
 from sql_filler.ui.utils import get_container
 import tkinter as tk
 import tkinter.ttk as ttk
 
 
 class InsertTab:
-    # NEW TODO FIXME luonnostelmaa
     def __init__(self, master=None, ui=None):
-        self.frame = container = get_container(master=master, width=800, height=550)
-        Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
-        self.box_container = LabelFrame(master=self.frame, text="Table Columns", width=750, height=1200)
+        self.frame = get_container(master=master, width=800, height=550)
+
+        self.scrollbar = Scrollbar(master=self.frame)
+        self.scrollable = tk.Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.scrollable.yview)
+        self.scrollable.grid(row=1, column=1)
+        self.scrollbar.grid(row=1, column=2, sticky='NS')
+
+        self.box_container = Frame(master=self.scrollable, width=750, height=1200)
+        self.box_container.columnconfigure(0, weight=3) # big/small button
+        self.box_container.columnconfigure(1, weight=1) # entry box
         self.box_container.grid(row=2, column=0)
+        # Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
 
         self._ui = ui
-        self._group = []
         self._values = None
 
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
         for column_data in column_list:
-            new_box = self.make_single_column_box(column_data)
-            # new_label = Label(master=self.box_container, text=column_data["column_name"])
-            # self._group.append(new_label)
-            new_box.grid(row=column_data["ordinal_position"], column=0)
+            self.make_single_row(column_data=column_data)
 
     def switch_selected_table(self):
-        for box in self._group:
-            # kato mallia accountista
-            box.grid_forget()
-        # bindaa tämä siihen selectediin tauluissa
+        for box in self.box_container.grid_slaves():
+            box.destroy()
         self.populate_insert_columns_tab()
+        self.frame.update_idletasks()
 
     def insert_values(self):
         pass
@@ -41,22 +44,29 @@ class InsertTab:
     def get_frame(self):
         return self.frame
 
-    def make_single_column_box(self, column_data):
-        """
-        Makes an expandable button+entry box from a column row.
+    def make_single_row(self, master=None, column_data=None):
+        if not master:
+            master = self.box_container
 
-        :param column_data:
-        table_name, table_id, column_name, ordinal_position, column_default, is_nullable, data_type,
-        generation_expression, is_updatable, character_maximum_length
+        def expand():
+            smallbutton.grid_forget()
+            bigbutton.grid(row=0, column=0)
 
-        :return:
-        """
-        container = Frame(master=self.box_container)
+        smallbutton = ttk.Button(master=master, text=column_data["column_name"], command=expand)
+        smallbutton.grid(row=column_data["ordinal_position"], column=0)
 
-        def expand_this():
-            pass
-        ttk.Button(container, text=column_data["column_name"], command=expand_this).grid(row=0, column=0)
-        ttk.Entry(container, width=20).grid(row=0, column=1)
+        def shrink():
+            bigbutton.grid_forget()
+            smallbutton.grid(row=0, column=0)
 
-        return container
+        txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
+        bigbutton = ttk.Button(master=master, text=txt, command=shrink)
+        valbox = ttk.Entry(self.box_container, width=20)
+        valbox.grid(row=column_data["ordinal_position"], column=1)
 
+    def _draw_scrollbar(self):
+        pass
+
+    def _reset_scrollregion(self):
+        # might need the bbox one too
+        self.box_container.update_idletasks()

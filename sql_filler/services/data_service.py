@@ -19,8 +19,8 @@ class DataService:
     def get_table_names(self):
         return self._postgresservice.get_table_names()
 
-    def get_insert_tab(self):
-        response = self._postgresservice.get_insert_tab_from_table()
+    def get_insert_tab(self, table_number: int):
+        response = self._postgresservice.get_insert_tab_from_table(table_number=table_number)
         if response:
             return [self._pretty_insert_tab_result(*result) for result in response]
         return None

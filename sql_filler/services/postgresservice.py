@@ -8,6 +8,8 @@ class PostgresService:
         self._dbname = None
         self._username = None
 
+        self._runtime_table_list = []
+
     # public methods
     # Connection
     def first_connection(self, dbname=None, username=None):
@@ -37,7 +39,9 @@ class PostgresService:
                 with self._get_connection() as conn:
                     with conn.cursor() as cur:
                         cur.execute(sql_string, (self._username,))
-                        return cur.fetchall()
+                        returnable = [item for tupl in cur.fetchall() for item in tupl]
+                        self._runtime_table_list = returnable
+                        return returnable
 
     # Tab methods
     def get_information_schema_columns(self):
@@ -52,16 +56,22 @@ class PostgresService:
                     return res
                     # return cur.fetchall()
 
-    def get_insert_tab_from_table(self):
+    def get_insert_tab_from_table(self, table_number: int):
+
+        if not isinstance(table_number, int):
+            return
+        if table_number < 0 or table_number >= len(self._runtime_table_list):
+            return
+        table_name = self._runtime_table_list[table_number]
+        if not self._clean_sql_string(table_name):
+            return
+
         sql_string = """SELECT 
         table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
         FROM information_schema.columns 
         WHERE table_schema=\'public\' AND table_name=%s
         ORDER BY ordinal_position ASC
         """
-        table_name = 'account'
-
-        # SELECT CAST('account'::regclass AS oid);
 
         # source https://cloud.google.com/spanner/docs/information-schema-pg
 

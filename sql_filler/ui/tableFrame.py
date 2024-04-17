@@ -34,14 +34,8 @@ class TableFrame:
     def switch_selected_table(self, event):
         self._ui.switch_selected_table()
 
-    def get_selected_table(self):
+    def get_selected_table(self) -> int:
         idxs = self.lb.curselection()
-        return idxs
-
-
-        # When a user changes the selection, a <<ListboxSelect>> virtual event is generated. You can bind to this to take any action you need. Depending on your application, 
-        # you may also want to bind to a double-click <Double-1> event and use it to invoke an action with the currently selected item.
-
-# lbox.bind("<<ListboxSelect>>", lambda e: updateDetails(lbox.curselection()))
-# lbox.bind("<Double-1>", lambda e: invokeAction(lbox.curselection()))
-
+        if len(idxs) == 1:
+            return idxs[0]
+        return -1
