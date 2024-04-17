@@ -52,7 +52,7 @@ class AccountFrame:
         return container
 
     def get_tab(self, **kwargs):
-        container = get_container(master=self.frame, width=400, height=300, **kwargs)
+        container = get_container(master=self.frame)
         container.grid(self._connection_tab_position_params, sticky=EW)
         return container
 

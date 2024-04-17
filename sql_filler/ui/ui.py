@@ -1,4 +1,4 @@
-from tkinter import Tk, EW
+from tkinter import Tk
 
 from sql_filler.ui.accountFrame import AccountFrame
 from sql_filler.ui.tableFrame import TableFrame
@@ -25,16 +25,16 @@ class UI:
 
     def _grid(self):
         self._main_label.grid(row=0, column=0, columnspan=2)
-        self._account.grid(row=1, column=0, sticky=EW)
-        self._table.grid(row=2, column=0)
+        self._account.grid(row=1, column=0, sticky='SEW')
+        self._table.grid(row=2, column=0, sticky='NEW')
         self._work.grid(row=1, column=1, rowspan=2)
 
     def _layout(self):
-        self.frame.columnconfigure(index=0, weight=1, uniform='left', minsize=200)
-        self.frame.columnconfigure(index=1, weight=10, uniform='right', minsize=200)
-        self.frame.rowconfigure(0, weight=0, minsize=100)
-        self.frame.rowconfigure(index=2, weight=1, minsize=200)
-        self.frame.rowconfigure(index=3, weight=5, minsize=300)
+        self.frame.columnconfigure(index=0, weight=0)
+        self.frame.columnconfigure(index=1, weight=0)
+        self.frame.rowconfigure(0, weight=0)
+        self.frame.rowconfigure(index=1, weight=0)
+        self.frame.rowconfigure(index=2, weight=0)
 
     def get_table_names(self):
         return self._data_service.get_table_names()

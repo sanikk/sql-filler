@@ -21,15 +21,16 @@ class TableFrame:
             content = []
         self.lb.insert('end', *content)
 
-    def grid(self, row, column):
+    def grid(self, row, column, sticky):
         """
         Passthrough method ui->self.frame
 
+        :param sticky:
         :param row:
         :param column:
         :return:
         """
-        self.frame.grid(row=row, column=column)
+        self.frame.grid(row=row, column=column, sticky=sticky)
 
     def switch_selected_table(self, event):
         self._ui.switch_selected_table()

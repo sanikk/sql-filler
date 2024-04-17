@@ -6,7 +6,7 @@ from tkinter import ttk
 
 class WorkFrame:
     def __init__(self, master=None, ui=None):
-        self.frame = get_container(master=master, width=800, height=600)
+        self.frame = get_container(master=master)
         self.insert_tab = None
         self.menu = self.get_menu_bar(ui=ui)
         self.menu.grid(row=0, column=0)
@@ -29,18 +29,18 @@ class WorkFrame:
         return tab_switcher
 
     def settings_tab(self, master=None):
-        container = get_container(text="Settings", master=master, width=800, height=550)
+        container = get_container(text="Settings", master=master)
         ttk.Button(master=container, text='settings button').grid(row=1, column=0)
         return container
 
     def table_info_tab(self, master=None):
-        container = get_container(text="Table info", master=master, width=800, height=550)
+        container = get_container(text="Table info", master=master)
         tb = tk.Text(master=container, width=80, height=20)
         tb.grid(row=2, column=0)
         return container
 
     def db_info_tab(self, master=None):
-        container = get_container(text="DB Info", master=master, width=800, height=550)
+        container = get_container(text="DB Info", master=master)
         return container
 
     def grid(self, row, column, rowspan):
