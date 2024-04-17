@@ -5,7 +5,7 @@ from sql_filler.ui.utils import get_container
 
 class InsertTab:
     def __init__(self, master=None, ui=None):
-        self.frame = get_container(master=master, width=800, height=550)
+        self.frame = Frame(master=master)
 
         self.scrollbar = Scrollbar(master=self.frame)
         self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
@@ -13,7 +13,7 @@ class InsertTab:
         self.scrollable.grid(row=1, column=1)
         self.scrollbar.grid(row=1, column=2, sticky='NS')
 
-        self.box_container = Frame(master=self.scrollable, width=750, height=1200)
+        self.box_container = Frame(master=self.scrollable)
         self.box_container.columnconfigure(0, weight=3) # big/small button
         self.box_container.columnconfigure(1, weight=1) # entry box
         self.box_container.grid(row=2, column=0)
@@ -32,7 +32,7 @@ class InsertTab:
         for box in self.box_container.grid_slaves():
             box.destroy()
         self.populate_insert_columns_tab()
-        self.frame.update_idletasks()
+        self._reset_scrollregion()
 
     def insert_values(self):
         pass
@@ -42,6 +42,11 @@ class InsertTab:
         # tree = Treeview(master=self, columns=column_names, displaycolumns='#all', selectmode='extended', height=20)
 
     def get_frame(self):
+        """
+        This one is need now for tab_switcher(ttk.Notebook) when adding the tab.
+
+        :return:
+        """
         return self.frame
 
     def make_single_row(self, master=None, column_data=None):
@@ -66,4 +71,4 @@ class InsertTab:
 
     def _reset_scrollregion(self):
         # might need the bbox one too
-        self.box_container.update_idletasks()
+        self.frame.update_idletasks()
