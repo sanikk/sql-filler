@@ -60,3 +60,6 @@ class WorkFrame:
     def switch_selected_table(self):
         self.insert_tab.switch_selected_table()
 
+    def discard_generated_values(self):
+        self.insert_tab.discard_generated_values()
+

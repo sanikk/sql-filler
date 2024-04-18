@@ -53,9 +53,15 @@ class UI:
         self._account.disconnect()
         self._table.update_tables()
 
-    def insert_values(self):
-        values = []
-        self._data_service.insert_values(values)
+    def generate_values(self, values):
+        self._data_service.generate_values(values)
+
+    def insert_generated_values(self):
+        self._data_service.insert_generated_values()
+
+    def discard_generated_values(self):
+        self._data_service.discard_generated_values()
+        self._work.discard_generated_values()
 
     def switch_selected_table(self):
         self._work.switch_selected_table()
@@ -67,3 +73,7 @@ class UI:
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()
+
+    #dev
+    def get_selected_table(self):
+        return self._table.get_selected_table()

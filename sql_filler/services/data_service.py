@@ -55,6 +55,15 @@ class DataService:
             'character_maximum_length': character_maximum_length
         }
 
+    def generate_data(self, data):
+        return self._postgresservice.generate_data(data)
+
+    def insert_generated_values(self):
+        self._postgresservice.insert_generated_values()
+
+    def discard_generated_values(self):
+        self._postgresservice.discard_generated_values()
+
     def get_tab1_info(self):
         return self._postgresservice.get_information_schema_columns()
 

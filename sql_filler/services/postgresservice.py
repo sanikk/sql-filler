@@ -8,7 +8,9 @@ class PostgresService:
         self._dbname = None
         self._username = None
 
+        # use index with data_service -> ui
         self._runtime_table_list = []
+        self._generated_inserts = []
 
     # public methods
     # Connection
@@ -85,6 +87,29 @@ class PostgresService:
             with conn.cursor() as cur:
                 cur.execute(sql_string, (table_name,))
                 return cur.fetchall()
+
+    def generate_data(self, data):
+        for table_number, amount, base_string in data:
+            strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
+            table_name = self._runtime_table_list[table_number]
+            sql = """
+                INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
+            """
+        # input
+        # (1, 14, 'user')
+
+
+        # output
+        # user1
+        # ...
+        # user14 in table 1
+        pass
+
+    def insert_generated_data(self):
+        sql = """
+            RETURNING id
+        """
+        pass
 
     def get_tab2_info(self):
         return ''
