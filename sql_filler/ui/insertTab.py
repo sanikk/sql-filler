@@ -20,7 +20,7 @@ class InsertTab:
         self.box_container.columnconfigure(0, weight=3) # big/small button
         self.box_container.columnconfigure(1, weight=1) # entry box
         # self.box_container.grid(row=1, column=0)
-        self.scrollable.create_window((0,0), window=self.box_container, anchor='nw')
+        self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
         self.box_container.bind("<Map>", self._reset_scrollregion())
         # self.box_container.
 
@@ -102,5 +102,5 @@ class InsertTab:
         self.box_container.update()
         self.frame.update()
         # self.scrollbar.
-        # self.box_container.config(scrollregion=self.scrollable.bbox('all'))
+        self.scrollable.config(scrollregion=self.scrollable.bbox('all'))
 
