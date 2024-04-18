@@ -34,13 +34,14 @@ class PostgresService:
     def get_table_names(self):
         if self._username and self._clean_sql_string(self._username):
             query = sql.SQL(
-                "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
+                "SELECT tablename from pg_catalog.pg_tables WHERE tableowner={tableowner}"
             ).format(
-                tableowner=sql.Identifier(self._username)
+                tableowner=sql.Literal(self._username)
             )
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(query)
+                    # TODO check return?
                     returnable = [item for tupl in cur.fetchall() for item in tupl]
                     self._runtime_table_list = returnable
                     return returnable
@@ -59,33 +60,23 @@ class PostgresService:
                     # return cur.fetchall()
 
     def get_insert_tab_from_table(self, table_number: int):
-
+        # TODO these are just sketches for checks
         if not isinstance(table_number, int):
             return
         if table_number < 0 or table_number >= len(self._runtime_table_list):
             return
         table_name = self._runtime_table_list[table_number]
-        if not self._clean_sql_string(table_name):
+        if not table_name or not self._clean_sql_string(table_name):
             return
 
-        sql_string = """SELECT 
-        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
-        FROM information_schema.columns 
-        WHERE table_schema=\'public\' AND table_name=%s
-        ORDER BY ordinal_position ASC
-        """
-
-        # source https://cloud.google.com/spanner/docs/information-schema-pg
-
-        # useless_basic_columns_in_postgresql = 'table_catalog, table_schema, '
-        # useful_basic_columns_in_postgresql = 'table_name, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable'
-        # used_precision_columns_in_postgresql = 'character_maximum_length'
-
-        # sama_kaikissa_saman_luokan_eli_duplikaatti_info = 'numeric_precision, numeric_precision_radix, numeric_scale'
-
+        query = sql.SQL(
+            "SELECT table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length FROM information_schema.columns WHERE table_schema=\'public\' AND table_name={table_name} ORDER BY ordinal_position ASC"
+        ).format(
+            table_name=table_name
+        )
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(sql_string, (table_name,))
+                cur.execute(query)
                 return cur.fetchall()
 
     def generate_data(self, data):
