@@ -1,4 +1,5 @@
 from sql_filler.db_connection import get_connection, test_connection
+from psycopg2 import sql
 from sqlalchemy import text
 import re
 
@@ -31,19 +32,18 @@ class PostgresService:
 
     # tableFrame
     def get_table_names(self):
-        if self._username:
-            # select * from pg_catalog.pg_tables
-            # schemaname |      tablename       | tableowner | tablespace | hasindexes | hasrules | hastriggers | rowsecurity
-            # ------------+----------------------+------------+------------+------------+----------+-------------+-------------
-            #  public     | account              | karpo      |            | t          | f        | t           | f
-            sql_string = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
-            if self._username and self._clean_sql_string(sql_string):
-                with self._get_connection() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute(sql_string, (self._username,))
-                        returnable = [item for tupl in cur.fetchall() for item in tupl]
-                        self._runtime_table_list = returnable
-                        return returnable
+        if self._username and self._clean_sql_string(self._username):
+            query = sql.SQL(
+                "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
+            ).format(
+                tableowner=sql.Identifier(self._username)
+            )
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query)
+                    returnable = [item for tupl in cur.fetchall() for item in tupl]
+                    self._runtime_table_list = returnable
+                    return returnable
 
     # Tab methods
     def get_information_schema_columns(self):
@@ -89,12 +89,16 @@ class PostgresService:
                 return cur.fetchall()
 
     def generate_data(self, data):
+        # TODO make it work
+        # TODO make it slightly _safisher_ by increments
         for table_number, amount, base_string in data:
             strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
             table_name = self._runtime_table_list[table_number]
             sql = """
-                INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
+                INSERT INTO {} VALUES ({','.join(['%s' for a in data])})
             """
+
+            # INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
         # input
         # (1, 14, 'user')
 
@@ -102,7 +106,7 @@ class PostgresService:
         # output
         # user1
         # ...
-        # user14 in table 1
+        # user14 in {:table 1}
         pass
 
     def insert_generated_data(self):
