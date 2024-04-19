@@ -34,8 +34,6 @@ class InsertTab:
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
         if not column_list:
-            print("No columns")
-            print(f"{self._ui.get_selected_table()}")
             return
         for column_data in column_list:
             self.make_single_row(column_data=column_data)
