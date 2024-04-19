@@ -1,27 +1,29 @@
-from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar
-from tkinter import Canvas, Label
+from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar, Label
+from tkinter import Canvas
 
 
 class InsertTab:
+    # TODO napit ylös, ja ne ei kuulu skrollattavaan alueeseen, vaan on koko ajan siinä
     def __init__(self, master=None, ui=None):
         self.frame = Frame(master=master)
 
         self.frame.rowconfigure(0, weight=0)
-        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", fg='cyan')
+        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
         # titles are purple & cyan now for that CGA/EGA look.
         self.table_label.grid(row=0, column=0, columnspan=2)
 
-        self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)
+        self.frame.columnconfigure(0, weight=1)
         self.scrollbar = Scrollbar(master=self.frame)
         self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.scrollable.yview)
-        self.scrollable.grid(row=1, column=0, sticky='NS')
-        self.scrollbar.grid(row=1, column=1, sticky='NS')
+        self.scrollable.grid(row=2, column=0, sticky='NSEW')
+        self.scrollbar.grid(row=2, column=1, sticky='NS')
         self.scrollable.rowconfigure(1, weight=0)
 
         self.generate_button = Button(master=self.frame, text="Generate inserts",
                                       command=self._generate_insert_statements)
-        self.generate_button.grid(row=1, column=2)
+        self.generate_button.grid(row=1, column=0)
 
         self.box_container = Frame(master=self.scrollable)
         self.box_container.columnconfigure(0, weight=1) # big/small button
@@ -61,36 +63,40 @@ class InsertTab:
     def _make_single_row(self, master=None, column_data=None):
         if not master:
             master = self.box_container
+        # ordinal position = column_index = order the column rows are in box_container.
         ordinal_position = column_data['ordinal_position']
+        small_button_params = {'row': ordinal_position, 'column': 0, 'sticky': 'EW'}
+        big_button_params = {'row': ordinal_position, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
+        datatype_label_params = {'row': ordinal_position, 'column': 1}
 
         # small button/datatype label area (replaces big button)
         def expand():
             smallbutton.grid_forget()
             datatype_label.grid_forget()
-            bigbutton.grid(row=ordinal_position, column=0, columnspan=2)
+            bigbutton.grid(big_button_params)
             self._reset_scrollregion()
         datatype_label = Label(master=master, text=column_data["data_type"])
         smallbutton = Button(master=master, text=column_data["column_name"], command=expand)
-        smallbutton.grid(row=ordinal_position, column=0)
-        datatype_label.grid(row=ordinal_position, column=1)
+        smallbutton.grid(small_button_params)
+        datatype_label.grid(datatype_label_params)
 
         # big button area (replaces small button/da..)
         def shrink():
             bigbutton.grid_forget()
-            smallbutton.grid(row=ordinal_position, column=0)
-            datatype_label.grid(row=ordinal_position, column=1)
+            smallbutton.grid(small_button_params)
+            datatype_label.grid(datatype_label_params)
             self._reset_scrollregion()
-        txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
-        bigbutton = Button(master=master, text=txt, command=shrink)
+        big_button_text = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
+        bigbutton = Button(master=master, text=big_button_text, command=shrink)
 
         # entry box area
         if not column_data["column_default"]:
-            val_box = Entry(self.box_container, width=20)
+            val_box = Entry(self.box_container)
             self._entry_boxes.append(val_box)
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
             val_box = Label(master=master, text=column_data["column_default"])
-        val_box.grid(row=ordinal_position, column=2)
+        val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
         return [box.get() for box in self._entry_boxes]
