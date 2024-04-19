@@ -33,14 +33,10 @@ class PostgresService:
     # tableFrame
     def get_table_names(self):
         if self._username and self._clean_sql_string(self._username):
-            query = sql.SQL(
-                "SELECT tablename from pg_catalog.pg_tables WHERE tableowner={tableowner}"
-            ).format(
-                tableowner=sql.Literal(self._username)
-            )
+            query = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query)
+                    cur.execute(query, (self._username,))
                     # TODO check return?
                     returnable = [item for tupl in cur.fetchall() for item in tupl]
                     self._runtime_table_list = returnable
@@ -68,37 +64,47 @@ class PostgresService:
         table_name = self._runtime_table_list[table_number]
         if not table_name or not self._clean_sql_string(table_name):
             return
+        query = """
+        SELECT 
+        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+        FROM information_schema.columns 
+        WHERE table_schema=\'public\' AND table_name=%s 
+        ORDER BY ordinal_position ASC
+        """
 
-        query = sql.SQL(
-            "SELECT table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length FROM information_schema.columns WHERE table_schema=\'public\' AND table_name={table_name} ORDER BY ordinal_position ASC"
-        ).format(
-            table_name=table_name
-        )
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(query)
+                cur.execute(query, (table_name,))
                 return cur.fetchall()
 
-    def generate_data(self, data):
+    def generate_single_insert(self, data):
+        # values = [(i, box.get()) for i, box in self._entry_boxes]
+        # eli input 1 * values
         # TODO make it work
         # TODO make it slightly _safisher_ by increments
-        for table_number, amount, base_string in data:
-            strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
-            table_name = self._runtime_table_list[table_number]
-            sql = """
-                INSERT INTO {} VALUES ({','.join(['%s' for a in data])})
-            """
+        table_number, amount, base_string = data
+        strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
+        table_name = self._runtime_table_list[table_number]
+        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(data))
+        query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
 
-            # INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
+        fquery = query.format(
+            table_name=table_name,
+            placeholders=placeholders
+        )
+        returnable = fquery.as_string(self._get_connection())
+        print(f"{returnable=}")
+        return returnable
+        # INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
         # input
         # (1, 14, 'user')
-
 
         # output
         # user1
         # ...
         # user14 in {:table 1}
-        pass
+
+        # data = [(1, 'id'), (2, 'name'), (3, 'password')]
 
     def insert_generated_data(self):
         sql = """

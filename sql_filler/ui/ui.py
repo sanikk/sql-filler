@@ -53,8 +53,8 @@ class UI:
         self._account.disconnect()
         self._table.update_tables()
 
-    def generate_values(self, values):
-        self._data_service.generate_values(values)
+    def generate_insert_statements(self, values):
+        self._data_service.generate_insert_statements(values)
 
     def insert_generated_values(self):
         self._data_service.insert_generated_values()

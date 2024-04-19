@@ -55,8 +55,10 @@ class DataService:
             'character_maximum_length': character_maximum_length
         }
 
-    def generate_data(self, data):
-        return self._postgresservice.generate_data(data)
+    def generate_insert_statements(self, data):
+        # postgresservice odottaa nyt muotoa
+        # table_number,
+        return self._postgresservice.generate_single_insert(data)
 
     def insert_generated_values(self):
         self._postgresservice.insert_generated_values()
