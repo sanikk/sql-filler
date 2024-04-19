@@ -1,20 +1,23 @@
 from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar
-from tkinter import Canvas
+from tkinter import Canvas, Label
 
 
 class InsertTab:
     def __init__(self, master=None, ui=None):
         self.frame = Frame(master=master)
-        self.frame.rowconfigure(1, weight=1)
 
+        self.frame.rowconfigure(0, weight=0)
+        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", fg='cyan')
+        self.table_label.grid(row=0, column=0, columnspan=2)
+
+        self.frame.rowconfigure(1, weight=1)
         self.scrollbar = Scrollbar(master=self.frame)
         self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.scrollable.yview)
-        self.scrollable.grid(row=1, column=1)
-        self.scrollbar.grid(row=1, column=2, sticky='NS')
+        self.scrollable.grid(row=1, column=0, sticky='NS')
+        self.scrollbar.grid(row=1, column=1, sticky='NS')
 
         self.scrollable.rowconfigure(1, weight=0)
-        # self.frame.rowconfigure(1, weight=1)
 
         self.box_container = Frame(master=self.scrollable)
         self.box_container.columnconfigure(0, weight=3) # big/small button
@@ -28,8 +31,6 @@ class InsertTab:
 
         self._ui = ui
         self._entry_boxes = []
-        # wrong place for this i think
-        self._generated_values = []
 
     def populate_insert_columns_tab(self):
         column_list = self._ui.get_insert_tab()
@@ -44,12 +45,12 @@ class InsertTab:
         self.populate_insert_columns_tab()
         self._reset_scrollregion()
 
-    def collect_values(self):
+    def _collect_values(self):
         values = [(i, box.get()) for i, box in self._entry_boxes]
         return values
 
     def generate_values(self):
-        values = self.collect_values()
+        values = self._collect_values()
         self._ui.generate_values(values)
 
     def insert_values(self):
