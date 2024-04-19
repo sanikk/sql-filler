@@ -3,7 +3,6 @@ from tkinter import Canvas
 
 
 class InsertTab:
-    # TODO napit ylös, ja ne ei kuulu skrollattavaan alueeseen, vaan on koko ajan siinä
     def __init__(self, master=None, ui=None):
         self.frame = Frame(master=master)
 
@@ -80,7 +79,7 @@ class InsertTab:
         smallbutton.grid(small_button_params)
         datatype_label.grid(datatype_label_params)
 
-        # big button area (replaces small button/da..)
+        # big button area (replaces small button/datatype label)
         def shrink():
             bigbutton.grid_forget()
             smallbutton.grid(small_button_params)
@@ -89,7 +88,7 @@ class InsertTab:
         big_button_text = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
         bigbutton = Button(master=master, text=big_button_text, command=shrink)
 
-        # entry box area
+        # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
             self._entry_boxes.append(val_box)
