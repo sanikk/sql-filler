@@ -34,7 +34,8 @@ class InsertTab:
         # Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
 
         self._ui = ui
-        self._entry_boxes = []
+        # self._entry_boxes = []
+        self._test_dict = {}
 
     def switch_selected_table(self):
         """
@@ -55,7 +56,8 @@ class InsertTab:
         column_list = self._ui.get_insert_tab()
         if not column_list:
             return
-        self._entry_boxes.clear()
+        # self._entry_boxes.clear()
+        self._test_dict.clear()
         for column_data in column_list:
             self._make_single_row(column_data=column_data)
 
@@ -91,14 +93,16 @@ class InsertTab:
         # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
-            self._entry_boxes.append(val_box)
+            # self._entry_boxes.append(val_box)
+            self._test_dict[column_data["column_name"]] = val_box
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
             val_box = Label(master=master, text=column_data["column_default"])
         val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
-        return [box.get() for box in self._entry_boxes]
+        return {k: v.get() for k,v in self._test_dict.items()}
+        # return {i: box.get() for i, box in self._test_dict}
 
     def _generate_insert_statements(self):
         values = self._collect_values()
