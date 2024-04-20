@@ -22,8 +22,8 @@ class DataService:
     def get_insert_tab(self, table_number: int):
         response = self._postgresservice.get_insert_tab_from_table(table_number=table_number)
         if response:
-            return [self._pretty_insert_tab_result(*result) for result in response]
-        return None
+            return table_number, [self._pretty_insert_tab_result(*result) for result in response]
+        return None, None
 
     def _pretty_insert_tab_result(self, table_name, table_id, column_name, ordinal_position, column_default, is_nullable,
                                   data_type, generation_expression, is_updatable, character_maximum_length):
@@ -31,16 +31,6 @@ class DataService:
         Makes an object out of insert tab result.
         Parameters are spelled out for easy pasting.
 
-        :param table_name:
-        :param column_name:
-        :param ordinal_position:
-        :param column_default:
-        :param is_nullable:
-        :param data_type:
-        :param generation_expression:
-        :param is_updatable:
-        :param character_maximum_length:
-        :return:
         """
         return {
             'table_name': table_name,
@@ -55,8 +45,25 @@ class DataService:
             'character_maximum_length': character_maximum_length
         }
 
-    def generate_data(self, data):
-        return self._postgresservice.generate_data(data)
+    def generate_insert_statements(self, table_number, amount, base_strings):
+        # TODO remove column names, they are for dev purposes. we can use integers.
+        #  10 different allowed characters is about right.
+        return self._postgresservice.generate_single_insert(table_number=table_number, amount=amount, base_strings=base_strings)
+
+
+        # for ordinal_position, value in values:
+            # this if does nothing now. i'm thinking of adding preprocessing here.
+            # if ',.' in value:
+             #    print(f"{value} contains ',.'")
+            # else:
+                # pass
+
+        # TODO add foreign key support, so multiple inserts are possible in one generate request. we need right insert
+        #  order and stuff
+
+
+    def _process_input_string(self, input_string):
+        pass
 
     def insert_generated_values(self):
         self._postgresservice.insert_generated_values()

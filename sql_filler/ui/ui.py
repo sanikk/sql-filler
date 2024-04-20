@@ -36,6 +36,8 @@ class UI:
         self.frame.rowconfigure(index=1, weight=0)
         self.frame.rowconfigure(index=2, weight=0)
 
+    # TODO maybe move most of these to dedicated services. inserttab_service, table_service, etc? with connection to
+    #  postgresservice or dataservice injected at init.
     def get_table_names(self):
         return self._data_service.get_table_names()
 
@@ -53,8 +55,8 @@ class UI:
         self._account.disconnect()
         self._table.update_tables()
 
-    def generate_values(self, values):
-        self._data_service.generate_values(values)
+    def generate_insert_statements(self, table_number, amount, base_strings):
+        return self._data_service.generate_insert_statements(table_number=table_number, amount=amount, base_strings=base_strings)
 
     def insert_generated_values(self):
         self._data_service.insert_generated_values()

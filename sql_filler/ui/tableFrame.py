@@ -34,6 +34,8 @@ class TableFrame:
 
     def switch_selected_table(self, event):
         self._ui.switch_selected_table()
+        # get current selection from listbox on <<ListboxSelect>> event:
+        # selected=event.widget.curselection()
 
     def get_selected_table(self) -> int:
         idxs = self.lb.curselection()

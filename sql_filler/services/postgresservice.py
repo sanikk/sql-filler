@@ -1,5 +1,5 @@
 from sql_filler.db_connection import get_connection, test_connection
-from sqlalchemy import text
+from psycopg2 import sql
 import re
 
 
@@ -31,79 +31,62 @@ class PostgresService:
 
     # tableFrame
     def get_table_names(self):
-        if self._username:
-            # select * from pg_catalog.pg_tables
-            # schemaname |      tablename       | tableowner | tablespace | hasindexes | hasrules | hastriggers | rowsecurity
-            # ------------+----------------------+------------+------------+------------+----------+-------------+-------------
-            #  public     | account              | karpo      |            | t          | f        | t           | f
-            sql_string = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
-            if self._username and self._clean_sql_string(sql_string):
-                with self._get_connection() as conn:
-                    with conn.cursor() as cur:
-                        cur.execute(sql_string, (self._username,))
-                        returnable = [item for tupl in cur.fetchall() for item in tupl]
-                        self._runtime_table_list = returnable
-                        return returnable
+        if self._username and self._clean_sql_string(self._username):
+            query = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
+            with self._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(query, (self._username,))
+                    # TODO check return?
+                    returnable = [item for tupl in cur.fetchall() for item in tupl]
+                    self._runtime_table_list = returnable
+                    return returnable
 
     # Tab methods
     def get_information_schema_columns(self):
         sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
-        # if self._clean_sql_string(sql_string):
+        # just a hardcoded query, not much to check
         if True:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(sql_string, (self._username,))
                     res = cur.fetchall()
-                    print(f"{res[0]=}")
                     return res
-                    # return cur.fetchall()
 
     def get_insert_tab_from_table(self, table_number: int):
-
+        # TODO these are just sketches for checks
         if not isinstance(table_number, int):
             return
         if table_number < 0 or table_number >= len(self._runtime_table_list):
             return
         table_name = self._runtime_table_list[table_number]
-        if not self._clean_sql_string(table_name):
+        if not table_name or not self._clean_sql_string(table_name):
             return
-
-        sql_string = """SELECT 
-        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+        query = """
+        SELECT 
+        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
+        is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
         FROM information_schema.columns 
-        WHERE table_schema=\'public\' AND table_name=%s
+        WHERE table_schema=\'public\' AND table_name=%s 
         ORDER BY ordinal_position ASC
         """
 
-        # source https://cloud.google.com/spanner/docs/information-schema-pg
-
-        # useless_basic_columns_in_postgresql = 'table_catalog, table_schema, '
-        # useful_basic_columns_in_postgresql = 'table_name, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable'
-        # used_precision_columns_in_postgresql = 'character_maximum_length'
-
-        # sama_kaikissa_saman_luokan_eli_duplikaatti_info = 'numeric_precision, numeric_precision_radix, numeric_scale'
-
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(sql_string, (table_name,))
+                cur.execute(query, (table_name,))
                 return cur.fetchall()
 
-    def generate_data(self, data):
-        for table_number, amount, base_string in data:
-            strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
-            table_name = self._runtime_table_list[table_number]
-            sql = """
-                INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
-            """
-        # input
-        # (1, 14, 'user')
+    def generate_single_insert(self, table_number, amount, base_strings):
+        strings = [f"{base_strings}{i}" for i in range(1, amount + 1)]
+        table_name = sql.Identifier(self._runtime_table_list[table_number])
+        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(base_strings))
+        query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
 
-
-        # output
-        # user1
-        # ...
-        # user14 in table 1
-        pass
+        fquery = query.format(
+            table_name=table_name,
+            placeholders=placeholders
+        )
+        returnable = fquery.as_string(self._get_connection())
+        return returnable
 
     def insert_generated_data(self):
         sql = """

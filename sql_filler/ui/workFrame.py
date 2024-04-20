@@ -35,7 +35,7 @@ class WorkFrame:
 
     def table_info_tab(self, master=None):
         container = get_container(text="Table info", master=master)
-        tb = tk.Text(master=container, width=80, height=20)
+        tb = tk.Text(master=container, width=60, height=20)
         tb.grid(row=2, column=0)
         return container
 

@@ -1,106 +1,145 @@
-from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar
-from tkinter import Canvas
+from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar, Label, LabelFrame
+from tkinter import Canvas, messagebox
 
 
 class InsertTab:
     def __init__(self, master=None, ui=None):
         self.frame = Frame(master=master)
-        self.frame.rowconfigure(1, weight=1)
 
+        self.frame.rowconfigure(0, weight=0)
+        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
+        self.table_label.grid(row=0, column=0, columnspan=2)
+
+        self.frame.rowconfigure(2, weight=1)
+        self.frame.columnconfigure(0, weight=1)
         self.scrollbar = Scrollbar(master=self.frame)
         self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.scrollable.yview)
-        self.scrollable.grid(row=1, column=1)
-        self.scrollbar.grid(row=1, column=2, sticky='NS')
-
+        self.scrollable.grid(row=2, column=0, sticky='NSEW')
+        self.scrollbar.grid(row=2, column=1, sticky='NS')
         self.scrollable.rowconfigure(1, weight=0)
-        # self.frame.rowconfigure(1, weight=1)
+
+        self.control_box = LabelFrame(master=self.frame)
+        Label(master=self.control_box, text="Amount").grid(row=0, column=0, sticky='E')
+        self.amount_box = Entry(master=self.control_box)
+        self.amount_box.grid(row=0, column=1)
+        self.generate_button = Button(master=self.control_box, text="Generate inserts",
+                                      command=self._generate_insert_statements)
+        self.generate_button.grid(row=0, column=2)
+        self.control_box.grid(row=1, column=0, columnspan=2)
 
         self.box_container = Frame(master=self.scrollable)
-        self.box_container.columnconfigure(0, weight=3) # big/small button
-        self.box_container.columnconfigure(1, weight=1) # entry box
-        # self.box_container.grid(row=1, column=0)
-        self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
-        self.box_container.bind("<Map>", self._reset_scrollregion())
-        # self.box_container.
+        self.box_container.columnconfigure(0, weight=1) # big/small button
+        self.box_container.columnconfigure(1, weight=1) # datatype label
+        self.box_container.columnconfigure(2, weight=1)  # entry box
 
-        # Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
+        self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
 
         self._ui = ui
         self._entry_boxes = []
-        # wrong place for this i think
-        self._generated_values = []
-
-    def populate_insert_columns_tab(self):
-        column_list = self._ui.get_insert_tab()
-        if not column_list:
-            print("No columns")
-            print(f"{self._ui.get_selected_table()}")
-            return
-        for column_data in column_list:
-            self.make_single_row(column_data=column_data)
+        self.filled_values = {}
+        self.selected_table = None
 
     def switch_selected_table(self):
+        """
+        Public function to switch db table shown in this tab.
+
+        Clears old table info from box_container, and fills it with new info.
+
+        Finally we update both contained frames(self.frame and self.box_container) and then scrollbar scroll area.
+
+        :return: None
+        """
+        values = self._collect_values()
+        if values and self.selected_table and self.filled_values:
+            self.filled_values[self.selected_table] = values
+
+        self._entry_boxes.clear()
         for box in self.box_container.grid_slaves():
             box.destroy()
-        self.populate_insert_columns_tab()
+
+        self._populate_insert_columns_tab()
         self._reset_scrollregion()
 
-    def collect_values(self):
-        values = [(i, box.get()) for i, box in self._entry_boxes]
-        return values
+    def _populate_insert_columns_tab(self):
+        self.selected_table, column_list = self._ui.get_insert_tab()
+        if not column_list:
+            return
+        for column_data in column_list:
+            self._make_single_row(column_data=column_data)
 
-    def generate_values(self):
-        values = self.collect_values()
-        self._ui.generate_values(values)
+    def _make_single_row(self, master=None, column_data=None):
+        if not master:
+            master = self.box_container
+        ordinal_position = column_data['ordinal_position']
+        small_button_params = {'row': ordinal_position, 'column': 0, 'sticky': 'EW'}
+        big_button_params = {'row': ordinal_position, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
+        datatype_label_params = {'row': ordinal_position, 'column': 1}
 
-    def insert_values(self):
-        self._ui.insert_generated_values()
+        # small button/datatype label area (replaces big button)
+        def expand():
+            smallbutton.grid_forget()
+            datatype_label.grid_forget()
+            bigbutton.grid(big_button_params)
+            self._reset_scrollregion()
+        datatype_label = Label(master=master, text=column_data["data_type"])
+        smallbutton = Button(master=master, text=column_data["column_name"], command=expand)
+        smallbutton.grid(small_button_params)
+        datatype_label.grid(datatype_label_params)
 
-    def discard_generated_values(self):
-        self._generated_values.clear()
+        # big button area (replaces small button/datatype label)
+        def shrink():
+            bigbutton.grid_forget()
+            smallbutton.grid(small_button_params)
+            datatype_label.grid(datatype_label_params)
+            self._reset_scrollregion()
+        big_button_text = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
+        bigbutton = Button(master=master, text=big_button_text, command=shrink)
 
-    def show_generated_values(self, master=None, column_names=None, data=None):
+        # value box area
+        if not column_data["column_default"]:
+            val_box = Entry(self.box_container)
+            self._entry_boxes.append((column_data["ordinal_position"], val_box))
+        else:
+            # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
+            val_box = Label(master=master, text=column_data["column_default"])
+        val_box.grid(row=ordinal_position, column=2, sticky='EW')
+
+    def _collect_values(self):
+        return self.amount_box.get(), [(tupl[0], tupl[1].get()) for tupl in self._entry_boxes if tupl[1].get()]
+
+    def _clean_values(self):
+        # TODO make sure user input is cleanish
+        pass
+
+    def _generate_insert_statements(self):
+        amount, values = self._collect_values()
+        amount = int(amount)
+        resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
+        # dev thing, we have signal
+        messagebox.showinfo("generated", resp)
+
+    def _insert_values(self):
+        pass
+
+    def _discard_generated_values(self):
+        pass
+
+    def _show_generated_values(self, master=None, column_names=None, data=None):
         pass
         # tree = Treeview(master=self, columns=column_names, displaycolumns='#all', selectmode='extended', height=20)
 
     def get_frame(self):
         """
+        Public function to access tab's Frame object.
+
         This one is needed now for tab_switcher(ttk.Notebook) when adding the tab.
 
-        :return:
+        :return: tkinter.ttk.Frame
         """
         return self.frame
 
-    def make_single_row(self, master=None, column_data=None):
-
-        if not master:
-            master = self.box_container
-        ordinal_position = column_data['ordinal_position']
-
-        def expand():
-            smallbutton.grid_forget()
-            bigbutton.grid(row=ordinal_position, column=0)
-            self._reset_scrollregion()
-
-        smallbutton = Button(master=master, text=column_data["column_name"], command=expand)
-        smallbutton.grid(row=ordinal_position, column=0)
-
-        def shrink():
-            bigbutton.grid_forget()
-            smallbutton.grid(row=ordinal_position, column=0)
-            self._reset_scrollregion()
-
-        txt = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
-        bigbutton = Button(master=master, text=txt, command=shrink)
-        valbox = Entry(self.box_container, width=20)
-        valbox.grid(row=ordinal_position, column=1)
-        self._entry_boxes.append((ordinal_position, valbox))
-
     def _reset_scrollregion(self):
-        # might need the bbox one too
         self.box_container.update()
         self.frame.update()
-        # self.scrollbar.
         self.scrollable.config(scrollregion=self.scrollable.bbox('all'))
-
