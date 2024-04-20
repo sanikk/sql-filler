@@ -1,6 +1,5 @@
 from sql_filler.db_connection import get_connection, test_connection
 from psycopg2 import sql
-from sqlalchemy import text
 import re
 
 
@@ -45,15 +44,13 @@ class PostgresService:
     # Tab methods
     def get_information_schema_columns(self):
         sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
-        # if self._clean_sql_string(sql_string):
+        # just a hardcoded query, not much to check
         if True:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(sql_string, (self._username,))
                     res = cur.fetchall()
-                    print(f"{res[0]=}")
                     return res
-                    # return cur.fetchall()
 
     def get_insert_tab_from_table(self, table_number: int):
         # TODO these are just sketches for checks
@@ -66,7 +63,8 @@ class PostgresService:
             return
         query = """
         SELECT 
-        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
+        is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
         FROM information_schema.columns 
         WHERE table_schema=\'public\' AND table_name=%s 
         ORDER BY ordinal_position ASC
@@ -77,15 +75,10 @@ class PostgresService:
                 cur.execute(query, (table_name,))
                 return cur.fetchall()
 
-    def generate_single_insert(self, data):
-        # values = [(i, box.get()) for i, box in self._entry_boxes]
-        # eli input 1 * values
-        # TODO make it work
-        # TODO make it slightly _safisher_ by increments
-        table_number, amount, base_string = data
-        strings = [f"{base_string}{i}" for i in range(1, amount + 1)]
-        table_name = self._runtime_table_list[table_number]
-        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(data))
+    def generate_single_insert(self, table_number, amount, base_strings):
+        strings = [f"{base_strings}{i}" for i in range(1, amount + 1)]
+        table_name = sql.Identifier(self._runtime_table_list[table_number])
+        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(base_strings))
         query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
 
         fquery = query.format(
@@ -93,18 +86,7 @@ class PostgresService:
             placeholders=placeholders
         )
         returnable = fquery.as_string(self._get_connection())
-        print(f"{returnable=}")
         return returnable
-        # INSERT INTO {} (col1, col2, col3) VALUES (%s, %s, %s)
-        # input
-        # (1, 14, 'user')
-
-        # output
-        # user1
-        # ...
-        # user14 in {:table 1}
-
-        # data = [(1, 'id'), (2, 'name'), (3, 'password')]
 
     def insert_generated_data(self):
         sql = """

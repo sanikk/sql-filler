@@ -1,5 +1,5 @@
-from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar, Label
-from tkinter import Canvas
+from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar, Label, LabelFrame
+from tkinter import Canvas, messagebox
 
 
 class InsertTab:
@@ -8,7 +8,6 @@ class InsertTab:
 
         self.frame.rowconfigure(0, weight=0)
         self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
-        # titles are purple & cyan now for that CGA/EGA look.
         self.table_label.grid(row=0, column=0, columnspan=2)
 
         self.frame.rowconfigure(2, weight=1)
@@ -20,9 +19,14 @@ class InsertTab:
         self.scrollbar.grid(row=2, column=1, sticky='NS')
         self.scrollable.rowconfigure(1, weight=0)
 
-        self.generate_button = Button(master=self.frame, text="Generate inserts",
+        self.control_box = LabelFrame(master=self.frame)
+        Label(master=self.control_box, text="Amount").grid(row=0, column=0, sticky='E')
+        self.amount_box = Entry(master=self.control_box)
+        self.amount_box.grid(row=0, column=1)
+        self.generate_button = Button(master=self.control_box, text="Generate inserts",
                                       command=self._generate_insert_statements)
-        self.generate_button.grid(row=1, column=0)
+        self.generate_button.grid(row=0, column=2)
+        self.control_box.grid(row=1, column=0, columnspan=2)
 
         self.box_container = Frame(master=self.scrollable)
         self.box_container.columnconfigure(0, weight=1) # big/small button
@@ -31,11 +35,10 @@ class InsertTab:
 
         self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
 
-        # Button(master=self.frame, text="Insert to DB", command=self.insert_values).grid(row=1, column=0)
-
         self._ui = ui
-        # self._entry_boxes = []
-        self._test_dict = {}
+        self._entry_boxes = []
+        self.filled_values = {}
+        self.selected_table = None
 
     def switch_selected_table(self):
         """
@@ -47,24 +50,27 @@ class InsertTab:
 
         :return: None
         """
+        values = self._collect_values()
+        if values and self.selected_table and self.filled_values:
+            self.filled_values[self.selected_table] = values
+
+        self._entry_boxes.clear()
         for box in self.box_container.grid_slaves():
             box.destroy()
+
         self._populate_insert_columns_tab()
         self._reset_scrollregion()
 
     def _populate_insert_columns_tab(self):
-        column_list = self._ui.get_insert_tab()
+        self.selected_table, column_list = self._ui.get_insert_tab()
         if not column_list:
             return
-        # self._entry_boxes.clear()
-        self._test_dict.clear()
         for column_data in column_list:
             self._make_single_row(column_data=column_data)
 
     def _make_single_row(self, master=None, column_data=None):
         if not master:
             master = self.box_container
-        # ordinal position = column_index = order the column rows are in box_container.
         ordinal_position = column_data['ordinal_position']
         small_button_params = {'row': ordinal_position, 'column': 0, 'sticky': 'EW'}
         big_button_params = {'row': ordinal_position, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
@@ -93,20 +99,25 @@ class InsertTab:
         # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
-            # self._entry_boxes.append(val_box)
-            self._test_dict[column_data["column_name"]] = val_box
+            self._entry_boxes.append((column_data["ordinal_position"], val_box))
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
             val_box = Label(master=master, text=column_data["column_default"])
         val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
-        return {k: v.get() for k,v in self._test_dict.items()}
-        # return {i: box.get() for i, box in self._test_dict}
+        return self.amount_box.get(), [(tupl[0], tupl[1].get()) for tupl in self._entry_boxes if tupl[1].get()]
+
+    def _clean_values(self):
+        # TODO make sure user input is cleanish
+        pass
 
     def _generate_insert_statements(self):
-        values = self._collect_values()
-        self._ui.generate_insert_statements(values)
+        amount, values = self._collect_values()
+        amount = int(amount)
+        resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
+        # dev thing, we have signal
+        messagebox.showinfo("generated", resp)
 
     def _insert_values(self):
         pass
