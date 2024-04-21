@@ -118,3 +118,38 @@ class PostgresService:
         # /s tabs, newline
         exp = r'^[a-zA-Z0-9_():\.\=\%\s]+$'
         return re.match(exp, string)
+
+    # sketches
+    # get table constraints
+    def get_constraints(self):
+        # https://www.postgresql.org/docs/current/catalog-pg-constraint.html
+        query = sql.SQL("SELECT * FROM pg_constraint")
+
+    # get null-rules, others seem funny
+    def get_attributes(self):
+        # https://www.postgresql.org/docs/current/catalog-pg-attribute.html
+        query = sql.SQL("SELECT * FROM pg_attribute")
+
+        insert_tab_query_with_constraints = """
+                SELECT 
+                table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
+                is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+                FROM information_schema.columns i LEFT JOIN pg_constraints p ON i. 
+                WHERE table_schema=\'public\' AND table_name=%s 
+                ORDER BY ordinal_position ASC
+                """
+        public_oid = "SELECT CAST('public'::regnamespace AS oid)"
+        public_constraints = "SELECT * FROM pg_constraint WHERE connamespace = CAST('public'::regnamespace AS oid)"
+        # conrelid(oid) kertoo missä taulussa tuo on
+        # SELECT CAST(oid::regclass AS name)                  u
+
+        cte_query_block = """
+        WITH tables
+        AS 
+        (
+        SELECT 
+        tablename AS name, CAST(tablename::regclass AS oid) AS oid, tablespace, hasindexes, hasrules, hastriggers, rowsecurity 
+        FROM pg_catalog.pg_tables WHERE tableowner=%s
+        )
+        """
+
