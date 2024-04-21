@@ -1,5 +1,5 @@
 from sql_filler.db_connection import get_connection, test_connection
-from psycopg2 import sql
+from psycopg import sql
 import re
 
 
@@ -32,10 +32,10 @@ class PostgresService:
     # tableFrame
     def get_table_names(self):
         if self._username and self._clean_sql_string(self._username):
-            query = "SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s"
+            query = sql.SQL("SELECT tablename from pg_catalog.pg_tables WHERE tableowner=%s")
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(query, (self._username,))
+                    cur.execute(query, [self._username])
                     # TODO check return?
                     returnable = [item for tupl in cur.fetchall() for item in tupl]
                     self._runtime_table_list = returnable
@@ -43,12 +43,12 @@ class PostgresService:
 
     # Tab methods
     def get_information_schema_columns(self):
-        sql_string = 'SELECT * FROM information_schema.columns WHERE table_schema=\'public\''
+        query = sql.SQL('SELECT * FROM information_schema.columns WHERE table_schema=\'public\'')
         # just a hardcoded query, not much to check
         if True:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(sql_string, (self._username,))
+                    cur.execute(query, [self._username])
                     res = cur.fetchall()
                     return res
 
@@ -61,18 +61,18 @@ class PostgresService:
         table_name = self._runtime_table_list[table_number]
         if not table_name or not self._clean_sql_string(table_name):
             return
-        query = """
+        query = sql.SQL("""
         SELECT 
         table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
         is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
         FROM information_schema.columns 
         WHERE table_schema=\'public\' AND table_name=%s 
         ORDER BY ordinal_position ASC
-        """
+        """)
 
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(query, (table_name,))
+                cur.execute(query, [table_name])
                 return cur.fetchall()
 
     def generate_single_insert(self, table_number, amount, base_strings):

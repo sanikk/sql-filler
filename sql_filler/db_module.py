@@ -1,11 +1,11 @@
-from psycopg2 import OperationalError
-from psycopg2.sql import SQL, Identifier
-from dotenv import load_dotenv
+from psycopg import OperationalError
+from psycopg.sql import SQL, Identifier
+# from python-dotenv import load_dotenv
 from os import getenv
 from sql_filler.db_connection import get_connection
 
 
-load_dotenv()
+# load_dotenv()
 
 
 def test_connection(dbname=None, username=None):
