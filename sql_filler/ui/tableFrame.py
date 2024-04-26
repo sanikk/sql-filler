@@ -40,7 +40,8 @@ class TableFrame:
                 new_table = None
         else:
             # TODO this should not happen. log this
-            print(f"tableFrame switch {new_table=}")
+            print(f"tableFrame switch {new_table=}, undefined behavior. Figure this out.")
+            new_table = None
         self._work.switch_selected_table(selected=new_table)
 
     def get_selected_table(self) -> int:

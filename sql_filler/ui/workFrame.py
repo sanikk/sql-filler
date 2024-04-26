@@ -16,7 +16,7 @@ class WorkFrame:
     def __init__(self, master=None, data_service=None):
         self.frame = get_container(master=master)
         self.insert_tab = None
-        self.statements_tab = None
+        self.statement_tab = None
 
         self.menu = self.get_menu_bar(master=self.frame, data_service=data_service)
         self.menu.grid(row=0, column=0)
@@ -28,8 +28,8 @@ class WorkFrame:
         # tab_switcher.add(self.insert_tab(master=master), text='insert data')
         self.insert_tab = InsertTab(master=master, data_service=data_service)
         tab_switcher.add(self.insert_tab.get_frame(), text='column data tab')
-        self.statements_tab = StatementsTab(master=master, data_service=data_service)
-        tab_switcher.add(self.statements_tab.get_frame(), text='statements tab')
+        self.statement_tab = StatementTab(master=master, data_service=data_service)
+        tab_switcher.add(self.statement_tab.get_frame(), text='statements tab')
         tab_switcher.add(self.db_info_tab(master=master), text='db info')
         # tab_switcher.add(tab, text='text')
         tab_switcher.add(self.settings_tab(master=master), text='settings')
