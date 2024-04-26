@@ -4,9 +4,10 @@ from sql_filler.ui.utils import get_container
 
 
 class TableFrame:
-    def __init__(self, master=None, data_service=None, ui=None):
+    def __init__(self, master=None, data_service=None, work=None):
+
         self._data_service = data_service
-        self._ui = ui
+        self._work = work
 
         self.frame = get_container(master=master)
         self.lb = Listbox(self.frame, height=12, width=30)
@@ -15,27 +16,20 @@ class TableFrame:
         self.lb.grid(row=0, column=0)
 
     def update_tables(self):
+        content = self._data_service.get_table_names()
+
         self.lb.delete(0, 'end')
-        content = self._ui.get_table_names()
-        if not content:
-            content = []
-        self.lb.insert('end', *content)
+        if content:
+            self.lb.insert('end', *content)
 
     def grid(self, row, column, sticky):
         """
         Passthrough method ui->self.frame
-
-        :param sticky:
-        :param row:
-        :param column:
-        :return:
         """
         self.frame.grid(row=row, column=column, sticky=sticky)
 
     def switch_selected_table(self, event):
-        self._ui.switch_selected_table()
-        # get current selection from listbox on <<ListboxSelect>> event:
-        # selected=event.widget.curselection()
+        self._work.switch_selected_table(selected=event.widget.curselection())
 
     def get_selected_table(self) -> int:
         idxs = self.lb.curselection()

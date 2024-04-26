@@ -16,9 +16,10 @@ class UI:
         self._data_service = data_service
 
         self._main_label = get_main_label(master=self.frame)
-        self._account = AccountFrame(master=self.frame, ui=self)
-        self._table = TableFrame(master=self.frame, ui=self)
-        self._work = WorkFrame(master=self.frame, ui=self)
+
+        self._work = WorkFrame(master=self.frame, data_service=data_service)
+        self._table = TableFrame(master=self.frame, data_service=data_service, work=self._work)
+        self._account = AccountFrame(master=self.frame, data_service=data_service, table=self._table)
 
         self._grid()
         self._layout()
@@ -56,7 +57,8 @@ class UI:
         self._table.update_tables()
 
     def generate_insert_statements(self, table_number, amount, base_strings):
-        return self._data_service.generate_insert_statements(table_number=table_number, amount=amount, base_strings=base_strings)
+        return self._data_service.generate_insert_statements(table_number=table_number, amount=amount,
+                                                             base_strings=base_strings)
 
     def insert_generated_values(self):
         self._data_service.insert_generated_values()
@@ -65,7 +67,7 @@ class UI:
         self._data_service.discard_generated_values()
         self._work.discard_generated_values()
 
-    def switch_selected_table(self):
+    def switch_selected_table(self, selected):
         self._work.switch_selected_table()
 
     def get_insert_tab(self):

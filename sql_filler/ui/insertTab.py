@@ -3,9 +3,14 @@ from tkinter import Canvas, messagebox
 
 
 class InsertTab:
-    def __init__(self, master=None, ui=None):
-        self.frame = Frame(master=master)
+    def __init__(self, master=None, data_service=None):
+        self._data_service = data_service
+        self._entry_boxes = []
+        self.saved_values = {}
+        # this should know which table it's showing for storing purposes
+        self.showing_table = None
 
+        self.frame = Frame(master=master)
         self.frame.rowconfigure(0, weight=0)
         self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
         self.table_label.grid(row=0, column=0, columnspan=2)
@@ -35,12 +40,7 @@ class InsertTab:
 
         self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
 
-        self._ui = ui
-        self._entry_boxes = []
-        self.filled_values = {}
-        self.selected_table = None
-
-    def switch_selected_table(self):
+    def switch_selected_table(self, new_selected_table):
         """
         Public function to switch db table shown in this tab.
 
@@ -51,24 +51,34 @@ class InsertTab:
         :return: None
         """
         values = self._collect_values()
-        if values and self.selected_table and self.filled_values:
-            self.filled_values[self.selected_table] = values
+        if values and self.showing_table:
+            self.saved_values[self.showing_table] = values
 
+
+        self.amount_box.delete(0, 'end')
         self._entry_boxes.clear()
         for box in self.box_container.grid_slaves():
             box.destroy()
 
+        self.showing_table = new_selected_table
         self._populate_insert_columns_tab()
         self._reset_scrollregion()
 
     def _populate_insert_columns_tab(self):
-        self.selected_table, column_list = self._ui.get_insert_tab()
+        self.selected_table, column_list = self._data_service.get_insert_tab()
+        print(f"{self.selected_table=} now")
         if not column_list:
             return
-        for column_data in column_list:
-            self._make_single_row(column_data=column_data)
+        amount, filled_values = self.filled_values.get(self.selected_table, ('', {}))
+        print(f"{amount=}, {filled_values=}")
+        if amount:
+            self.amount_box.insert('end', amount)
 
-    def _make_single_row(self, master=None, column_data=None):
+        for i, column_data in enumerate(column_list):
+            self._make_single_row(column_data=column_data,
+                                  filled_data=filled_values.get(i))
+
+    def _make_single_row(self, master=None, column_data=None, filled_data=None):
         if not master:
             master = self.box_container
         ordinal_position = column_data['ordinal_position']
@@ -99,6 +109,8 @@ class InsertTab:
         # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
+            if filled_data:
+                val_box.insert('end', filled_data)
             self._entry_boxes.append((column_data["ordinal_position"], val_box))
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
@@ -106,7 +118,11 @@ class InsertTab:
         val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
-        return self.amount_box.get(), [(tupl[0], tupl[1].get()) for tupl in self._entry_boxes if tupl[1].get()]
+        returnable = [self.amount_box.get() + a[1] for a in self._entry_boxes]
+        print(f"{returnable=}")
+        # returnable = {tupl[0]: tupl[1].get() for tupl in self._entry_boxes if tupl[1].get()}
+        #if returnable:
+        #    return int(self.amount_box.get()), returnable
 
     def _clean_values(self):
         # TODO make sure user input is cleanish
@@ -114,7 +130,6 @@ class InsertTab:
 
     def _generate_insert_statements(self):
         amount, values = self._collect_values()
-        amount = int(amount)
         resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
         # dev thing, we have signal
         messagebox.showinfo("generated", resp)
