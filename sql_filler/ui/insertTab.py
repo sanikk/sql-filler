@@ -6,40 +6,52 @@ class InsertTab:
     def __init__(self, master=None, data_service=None):
         self._data_service = data_service
         self._entry_boxes = []
-
         self.saved_values = {}
-
         self.showing_table = None
 
         self.frame = Frame(master=master)
-        self.frame.rowconfigure(0, weight=0)
-        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
-        self.table_label.grid(row=0, column=0, columnspan=2)
 
-        self.frame.rowconfigure(2, weight=1)
-        self.frame.columnconfigure(0, weight=1)
-        self.scrollbar = Scrollbar(master=self.frame)
-        self.scrollable = Canvas(master=self.frame, yscrollcommand=self.scrollbar.set)
-        self.scrollbar.config(command=self.scrollable.yview)
+        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
+
+        self.scrollable = None
+        self.amount_box = None
+        self.box_container = None
+        self._make_scrollable_frame()
+
+        self._grid()
+        self._layout()
+
+    def _make_scrollable_frame(self):
+        scrollbar = Scrollbar(master=self.frame)
+        self.scrollable = Canvas(master=self.frame, yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.scrollable.yview)
         self.scrollable.grid(row=2, column=0, sticky='NSEW')
-        self.scrollbar.grid(row=2, column=1, sticky='NS')
+        scrollbar.grid(row=2, column=1, sticky='NS')
         self.scrollable.rowconfigure(1, weight=0)
 
-        self.control_box = LabelFrame(master=self.frame)
-        Label(master=self.control_box, text="Amount").grid(row=0, column=0, sticky='E')
-        self.amount_box = Entry(master=self.control_box)
+        controls_box = LabelFrame(master=self.frame)
+        Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
+        self.amount_box = Entry(master=controls_box)
         self.amount_box.grid(row=0, column=1)
-        self.generate_button = Button(master=self.control_box, text="Generate inserts",
-                                      command=self._generate_insert_statements)
-        self.generate_button.grid(row=0, column=2)
-        self.control_box.grid(row=1, column=0, columnspan=2)
-
+        Button(master=controls_box, text="Generate inserts",
+                                      command=self._generate_insert_statements).grid(row=0, column=2)
+        controls_box.grid(row=1, column=0, columnspan=2)
         self.box_container = Frame(master=self.scrollable)
-        self.box_container.columnconfigure(0, weight=1) # big/small button
-        self.box_container.columnconfigure(1, weight=1) # datatype label
+        self.box_container.columnconfigure(0, weight=1)  # big/small button
+        self.box_container.columnconfigure(1, weight=1)  # datatype label
         self.box_container.columnconfigure(2, weight=1)  # entry box
 
         self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
+
+    def _grid(self):
+        self.table_label.grid(row=0, column=0, columnspan=2)
+        pass
+
+    def _layout(self):
+        self.frame.rowconfigure(0, weight=0)
+        self.frame.rowconfigure(2, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        pass
 
     def switch_selected_table(self, new_selected_table: int):
         """
