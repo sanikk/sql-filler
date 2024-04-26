@@ -4,6 +4,7 @@ from sql_filler.ui.utils import get_container
 
 
 class TableFrame:
+    # TODO color code status of table. are there generated inserts or filled data.
     def __init__(self, master=None, data_service=None, work=None):
 
         self._data_service = data_service

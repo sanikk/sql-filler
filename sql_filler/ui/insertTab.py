@@ -4,10 +4,10 @@ from tkinter import Canvas, messagebox
 
 class InsertTab:
     def __init__(self, master=None, data_service=None):
+        # self._work = work
         self._data_service = data_service
         self._entry_boxes = []
         self.saved_values = {}
-        # this should know which table it's showing for storing purposes
         self.showing_table = None
 
         self.frame = Frame(master=master)
@@ -54,7 +54,6 @@ class InsertTab:
         if values and self.showing_table:
             self.saved_values[self.showing_table] = values
 
-
         self.amount_box.delete(0, 'end')
         self._entry_boxes.clear()
         for box in self.box_container.grid_slaves():
@@ -65,11 +64,11 @@ class InsertTab:
         self._reset_scrollregion()
 
     def _populate_insert_columns_tab(self):
-        self.selected_table, column_list = self._data_service.get_insert_tab()
-        print(f"{self.selected_table=} now")
+        new_table = self.showing_table
+        column_list = self._data_service.get_insert_tab(table_number=new_table)
         if not column_list:
             return
-        amount, filled_values = self.filled_values.get(self.selected_table, ('', {}))
+        amount, filled_values = self.saved_values.get(self.showing_table, ('', {}))
         print(f"{amount=}, {filled_values=}")
         if amount:
             self.amount_box.insert('end', amount)

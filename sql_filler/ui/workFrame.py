@@ -14,17 +14,15 @@ class WorkFrame:
         self.insert_tab = None
         self._data_service = data_service
 
-        self.menu = self.get_menu_bar()
+        self.menu = self.get_menu_bar(master=self.frame, data_service=data_service)
         self.menu.grid(row=0, column=0)
 
-    def get_menu_bar(self, master=None):
-        if not master:
-            master = self.frame
+    def get_menu_bar(self, master=None, data_service=None):
         tab_switcher = ttk.Notebook(master=master)
 
         tab_switcher.add(self.table_info_tab(master=master), text='table info')
         # tab_switcher.add(self.insert_tab(master=master), text='insert data')
-        self.insert_tab = InsertTab(master=master)
+        self.insert_tab = InsertTab(master=master, data_service=data_service)
         tab_switcher.add(self.insert_tab.get_frame(), text='insert data')
         tab_switcher.add(self.db_info_tab(master=master), text='db info')
         # tab_switcher.add(tab, text='text')

@@ -26,8 +26,8 @@ class DataService:
     def get_insert_tab(self, table_number: int):
         response = self._postgresservice.get_insert_tab_from_table(table_number=table_number)
         if response:
-            return table_number, [self._pretty_insert_tab_result(*result) for result in response]
-        return None, None
+            return [self._pretty_insert_tab_result(*result) for result in response]
+        return None
 
     def _pretty_insert_tab_result(self, table_name, table_id, column_name, ordinal_position, column_default, is_nullable,
                                   data_type, generation_expression, is_updatable, character_maximum_length):
