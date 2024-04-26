@@ -37,47 +37,23 @@ class UI:
         self.frame.rowconfigure(index=1, weight=0)
         self.frame.rowconfigure(index=2, weight=0)
 
-    # TODO maybe move most of these to dedicated services. inserttab_service, table_service, etc? with connection to
-    #  postgresservice or dataservice injected at init.
-    def get_table_names(self):
-        return self._data_service.get_table_names()
-
-    def get_connection_credentials(self):
-        return self._data_service.get_connection_credentials()
-
-    def connect(self):
-        dbname, username = self._account.get_entry_values()
-        if dbname and username and self._data_service.connect(dbname, username):
-            self._account.connect()
-            self._table.update_tables()
-
-    def disconnect(self):
-        self._data_service.disconnect()
-        self._account.disconnect()
-        self._table.update_tables()
-
     def generate_insert_statements(self, table_number, amount, base_strings):
+        """
+        This should be useful here. We need to update another frame in workFrame.
+
+        """
         return self._data_service.generate_insert_statements(table_number=table_number, amount=amount,
                                                              base_strings=base_strings)
 
-    def insert_generated_values(self):
-        self._data_service.insert_generated_values()
-
     def discard_generated_values(self):
+        """
+        Probably not needed here. Put this in the generated_values tab.
+
+        :return:
+        """
         self._data_service.discard_generated_values()
         self._work.discard_generated_values()
-
-    def switch_selected_table(self, selected):
-        self._work.switch_selected_table()
-
-    def get_insert_tab(self):
-        table_number = self._table.get_selected_table()
-        return self._data_service.get_insert_tab(table_number=table_number)
 
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()
-
-    #dev
-    def get_selected_table(self):
-        return self._table.get_selected_table()
