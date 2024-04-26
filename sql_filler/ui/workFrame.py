@@ -5,14 +5,17 @@ from tkinter import ttk
 
 
 class WorkFrame:
-    # TODO Last reorg went this far. Need some functionality to figure out what i need.
-    #  So now work frame handles passthrough stuff for tabs. Great. At least
-    #  account + table are somewhat sensible now.
+    # TODO Last reorg went this far.
+    #  workFrame:
+    #  Things happening in one tab should influence what another tab would show.
+    #  But so far we have one tab for filling column info, another for showing generated statements and
+    #  selecting + running them. This we can update from data_service. Have tab switch run refresh on the new shown tab,
+    #  load new state from data_service.
 
     def __init__(self, master=None, data_service=None):
         self.frame = get_container(master=master)
         self.insert_tab = None
-        self._data_service = data_service
+        self.statements_tab = None
 
         self.menu = self.get_menu_bar(master=self.frame, data_service=data_service)
         self.menu.grid(row=0, column=0)
@@ -23,7 +26,9 @@ class WorkFrame:
         tab_switcher.add(self.table_info_tab(master=master), text='table info')
         # tab_switcher.add(self.insert_tab(master=master), text='insert data')
         self.insert_tab = InsertTab(master=master, data_service=data_service)
-        tab_switcher.add(self.insert_tab.get_frame(), text='insert data')
+        tab_switcher.add(self.insert_tab.get_frame(), text='column data tab')
+        self.statements_tab = StatementsTab(master=master, data_service=data_service)
+        tab_switcher.add(self.statements_tab.get_frame(), text='statements tab')
         tab_switcher.add(self.db_info_tab(master=master), text='db info')
         # tab_switcher.add(tab, text='text')
         tab_switcher.add(self.settings_tab(master=master), text='settings')
@@ -75,3 +80,14 @@ class WorkFrame:
     def discard_generated_values(self):
         self.insert_tab.discard_generated_values()
 
+
+class StatementsTab:
+    def __init__(self, master=None, data_service=None):
+        self._data_service = data_service
+        self.frame = get_container(text="Statements tab", master=master)
+
+    def get_frame(self):
+        return self.frame
+
+    def grid(self):
+        self.frame.grid()
