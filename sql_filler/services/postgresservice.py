@@ -54,7 +54,7 @@ class PostgresService:
 
     def get_insert_tab_from_table(self, table_number: int):
         # TODO these are just sketches for checks
-        if not isinstance(table_number, int):
+        if table_number is None or not isinstance(table_number, int):
             return
         if table_number < 0 or table_number >= len(self._runtime_table_list):
             return

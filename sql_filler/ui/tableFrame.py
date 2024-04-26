@@ -11,15 +11,15 @@ class TableFrame:
         self._work = work
 
         self.frame = get_container(master=master)
-        self.lb = Listbox(self.frame, height=12, width=30)
+        self.lb = Listbox(self.frame, height=12, width=30, selectmode='BROWSE')
         self.lb.bind('<<ListboxSelect>>', self.switch_selected_table)
         Scrollbar(self.frame, command=self.lb.yview).grid(row=0, column=1, sticky='W')
         self.lb.grid(row=0, column=0)
 
     def update_tables(self):
-        content = self._data_service.get_table_names()
-
         self.lb.delete(0, 'end')
+
+        content = self._data_service.get_table_names()
         if content:
             self.lb.insert('end', *content)
 
@@ -30,7 +30,18 @@ class TableFrame:
         self.frame.grid(row=row, column=column, sticky=sticky)
 
     def switch_selected_table(self, event):
-        self._work.switch_selected_table(selected=event.widget.curselection())
+        new_table = event.widget.curselection()
+        if new_table and len(new_table) == 1:
+            try:
+                new_table = int(new_table[0])
+            except ValueError:
+                # TODO this should not happen. log this
+                print(f"tableFrame switch ValueError: {new_table=}")
+                new_table = None
+        else:
+            # TODO this should not happen. log this
+            print(f"tableFrame switch {new_table=}")
+        self._work.switch_selected_table(selected=new_table)
 
     def get_selected_table(self) -> int:
         idxs = self.lb.curselection()

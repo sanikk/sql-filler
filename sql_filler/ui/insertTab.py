@@ -4,10 +4,11 @@ from tkinter import Canvas, messagebox
 
 class InsertTab:
     def __init__(self, master=None, data_service=None):
-        # self._work = work
         self._data_service = data_service
         self._entry_boxes = []
+
         self.saved_values = {}
+
         self.showing_table = None
 
         self.frame = Frame(master=master)
@@ -40,19 +41,16 @@ class InsertTab:
 
         self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
 
-    def switch_selected_table(self, new_selected_table):
+    def switch_selected_table(self, new_selected_table: int):
         """
         Public function to switch db table shown in this tab.
 
-        Clears old table info from box_container, and fills it with new info.
-
-        Finally we update both contained frames(self.frame and self.box_container) and then scrollbar scroll area.
-
         :return: None
         """
-        values = self._collect_values()
-        if values and self.showing_table:
-            self.saved_values[self.showing_table] = values
+        if self.showing_table is not None:
+            values = self._collect_values()
+            if any(values):
+                self.saved_values[self.showing_table] = values
 
         self.amount_box.delete(0, 'end')
         self._entry_boxes.clear()
@@ -60,26 +58,29 @@ class InsertTab:
             box.destroy()
 
         self.showing_table = new_selected_table
-        self._populate_insert_columns_tab()
+        if new_selected_table is not None:
+            self._populate_insert_columns_tab(new_table=new_selected_table)
         self._reset_scrollregion()
 
-    def _populate_insert_columns_tab(self):
-        new_table = self.showing_table
-        column_list = self._data_service.get_insert_tab(table_number=new_table)
+    def _populate_insert_columns_tab(self, new_table: int = None):
+        if new_table is None or not isinstance(new_table, int):
+            return
+
+        column_list = self._data_service.inserttab_fill(table_number=new_table)
         if not column_list:
             return
-        amount, filled_values = self.saved_values.get(self.showing_table, ('', {}))
-        print(f"{amount=}, {filled_values=}")
-        if amount:
-            self.amount_box.insert('end', amount)
+        for column_data in column_list:
+            self._make_single_row(column_data=column_data)
+        filled_values = self.saved_values.get(self.showing_table, [])
+        if filled_values and any(filled_values):
+            self.amount_box.insert('end', filled_values[0])
+            for val, box in zip(filled_values[1:], self._entry_boxes):
+                box[1].insert('end', val)
 
-        for i, column_data in enumerate(column_list):
-            self._make_single_row(column_data=column_data,
-                                  filled_data=filled_values.get(i))
-
-    def _make_single_row(self, master=None, column_data=None, filled_data=None):
+    def _make_single_row(self, master=None, column_data=None):
         if not master:
             master = self.box_container
+
         ordinal_position = column_data['ordinal_position']
         small_button_params = {'row': ordinal_position, 'column': 0, 'sticky': 'EW'}
         big_button_params = {'row': ordinal_position, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
@@ -96,7 +97,6 @@ class InsertTab:
         smallbutton.grid(small_button_params)
         datatype_label.grid(datatype_label_params)
 
-        # big button area (replaces small button/datatype label)
         def shrink():
             bigbutton.grid_forget()
             smallbutton.grid(small_button_params)
@@ -108,8 +108,6 @@ class InsertTab:
         # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
-            if filled_data:
-                val_box.insert('end', filled_data)
             self._entry_boxes.append((column_data["ordinal_position"], val_box))
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
@@ -117,21 +115,20 @@ class InsertTab:
         val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
-        returnable = [self.amount_box.get() + a[1] for a in self._entry_boxes]
-        print(f"{returnable=}")
-        # returnable = {tupl[0]: tupl[1].get() for tupl in self._entry_boxes if tupl[1].get()}
-        #if returnable:
-        #    return int(self.amount_box.get()), returnable
+        amount = self.amount_box.get()
+        values = [a[1].get() for a in self._entry_boxes]
+        return [amount, *values]
 
     def _clean_values(self):
         # TODO make sure user input is cleanish
         pass
 
     def _generate_insert_statements(self):
-        amount, values = self._collect_values()
-        resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
+        pass
+        # amount, values = self._collect_values()
+        # resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
         # dev thing, we have signal
-        messagebox.showinfo("generated", resp)
+        # messagebox.showinfo("generated", resp)
 
     def _insert_values(self):
         pass

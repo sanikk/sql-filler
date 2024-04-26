@@ -67,14 +67,18 @@ class WorkFrame:
         return ttk.Label(master=master, text=f'Selected table {master}')
 
     # Passthrough functions because workframe handles this for now
-    def switch_selected_table(self, selected=None):
+    def switch_selected_table(self, selected: int = None):
         """
         Passthrough function for now. I want this to update other tabs too when they have the functionality.
+
+        None needs to pass through so we can clear inserttab.
 
         :param selected:
         :return:
         """
-        self.insert_tab.switch_selected_table(new_selected_table=selected)
+
+        if isinstance(selected, int) or selected is None:
+            self.insert_tab.switch_selected_table(new_selected_table=selected)
 
     # ?
     def discard_generated_values(self):
