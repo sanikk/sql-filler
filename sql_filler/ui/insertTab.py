@@ -148,10 +148,6 @@ class InsertTab:
     def _discard_generated_values(self):
         pass
 
-    def _show_generated_values(self, master=None, column_names=None, data=None):
-        pass
-        # tree = Treeview(master=self, columns=column_names, displaycolumns='#all', selectmode='extended', height=20)
-
     def get_frame(self):
         """
         Public function to access tab's Frame object.

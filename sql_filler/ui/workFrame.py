@@ -1,5 +1,6 @@
 from sql_filler.ui.utils import get_container
 from sql_filler.ui.insertTab import InsertTab
+from sql_filler.ui.statementTab import StatementTab
 import tkinter as tk
 from tkinter import ttk
 
@@ -83,15 +84,3 @@ class WorkFrame:
     # ?
     def discard_generated_values(self):
         self.insert_tab.discard_generated_values()
-
-
-class StatementsTab:
-    def __init__(self, master=None, data_service=None):
-        self._data_service = data_service
-        self.frame = get_container(text="Statements tab", master=master)
-
-    def get_frame(self):
-        return self.frame
-
-    def grid(self):
-        self.frame.grid()
