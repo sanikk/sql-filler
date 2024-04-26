@@ -19,7 +19,7 @@ class AccountFrame:
 
     def connect(self):
         dbname, username = self.get_entry_values()
-        if dbname and username and self._data_service.connection_new(dbname, username):
+        if dbname and username and self._data_service.account_new(dbname, username):
             self._connected_tab = self.connected_tab()
             self._unconnected_tab.grid_forget()
             self._connected_tab.grid(self._connection_tab_position_params)
@@ -27,7 +27,7 @@ class AccountFrame:
             self._table.update_tables()
 
     def disconnect(self):
-        self._data_service.connection_close()
+        self._data_service.account_close()
         self._connected_tab.destroy()
         self._unconnected_tab.grid(self._connection_tab_position_params)
 
@@ -51,7 +51,7 @@ class AccountFrame:
     def connected_tab(self, master=None) -> Frame:
         container = self.get_tab(text='Connected to')
 
-        dbname, username = self._data_service.connection_get_login_info()
+        dbname, username = self._data_service.account_get_login_info()
         Label(master=container, text=f'{username}@{dbname}').grid(row=1, column=0, sticky=EW)
 
         Button(master=container, text="Disconnect", command=self.disconnect).grid(row=2, column=0, sticky=EW)

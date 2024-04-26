@@ -6,18 +6,18 @@ class DataService:
     def __init__(self, postgresservice):
         self._postgresservice = postgresservice
 
-    def connection_new(self, dbname: str, username: str) -> bool:
+    def account_new(self, dbname: str, username: str) -> bool:
         if dbname and username and self._postgresservice.first_connection(dbname, username):
             return True
         return False
 
-    def connection_close(self):
+    def account_close(self):
         self._postgresservice.disconnect()
 
-    def connection_get_status(self):
+    def account_get_status(self):
         return self._postgresservice.is_connected()
 
-    def connection_get_login_info(self):
+    def account_get_login_info(self):
         return self._postgresservice.get_connection_credentials()
 
     def inserttab_fill(self, table_number: int):
