@@ -43,6 +43,16 @@ class InsertTab:
 
         self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
 
+    def make_control_box(self, master=None):
+        # got self.frame as master orig..
+        controls_box = LabelFrame(master=master)
+        Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
+        amount_box = Entry(master=controls_box)
+        amount_box.grid(row=0, column=1)
+        Button(master=controls_box, text="Generate inserts",
+               command=self._generate_insert_statements).grid(row=0, column=2)
+        controls_box.grid(row=1, column=0, columnspan=2)
+
     def _grid(self):
         self.table_label.grid(row=0, column=0, columnspan=2)
         pass
@@ -75,7 +85,7 @@ class InsertTab:
         self._reset_scrollregion()
 
     def _populate_insert_columns_tab(self, new_table: int = None):
-        if new_table is None or not isinstance(new_table, int):
+        if not isinstance(new_table, int):
             return
 
         column_list = self._data_service.inserttab_fill(table_number=new_table)
@@ -137,15 +147,9 @@ class InsertTab:
     def _generate_insert_statements(self):
         values = self._collect_values()
         resp = self._data_service.generate_insert_statements(table_number=self.showing_table, values=values)
-        # dev thing, we have signal
+        # TODO remove these once we have statementstab
         print(f"{resp=}")
         messagebox.showinfo("generated", resp)
-
-    def _insert_values(self):
-        pass
-
-    def _discard_generated_values(self):
-        pass
 
     def get_frame(self):
         """

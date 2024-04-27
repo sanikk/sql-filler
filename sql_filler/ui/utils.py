@@ -1,9 +1,10 @@
-from tkinter import Canvas, Label, Frame
-from tkinter.ttk import Scrollbar
+from tkinter import Canvas
+from tkinter.ttk import Scrollbar, Label, Frame
 
 
 def get_container(master=None, text=None, columnspan=1, rowspan=1):
-    container = Frame(master=master, highlightthickness=5, highlightbackground='yellow')
+    container = Frame(master=master,)
+    # highlightthickness=5, highlightbackground='yellow')
     if text:
         Label(master=container, text=text, font='Calibri 22').grid(row=0, column=0, columnspan=columnspan,
                                                                    rowspan=rowspan)
@@ -11,7 +12,8 @@ def get_container(master=None, text=None, columnspan=1, rowspan=1):
 
 
 def get_main_label(master=None):
-    main_label = Label(master=master, text='SQL Filler', fg='purple', font='Calibri 24')
+    main_label = Label(master=master, text='SQL Filler', font='Calibri 24')
+    # fg='purple',
     return main_label
 
 

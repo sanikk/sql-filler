@@ -3,32 +3,6 @@ import tkinter.ttk as ttk
 from sql_filler.ui.utils import get_container
 
 
-"""
-NOTE - OLD NOTES !
-i just used the readymade file.
-
-Playground for prepared statements.
-
-https://www.postgresql.org/docs/current/sql-prepare.html
-
-- Prepared statements only last for the duration of the current database session.
-
-- Prepared statements potentially have the largest performance advantage when a single session is being used to execute
-a large number of similar statements. The performance difference will be particularly significant if the statements
-are complex to plan or rewrite, e.g., if the query involves a join of many tables or requires the application of
-several rules. If the statement is relatively simple to plan and rewrite but relatively expensive to execute, the
-performance advantage of prepared statements will be less noticeable.
-
-https://www.postgresql.org/docs/current/view-pg-prepared-statements.html
-
-- get info on prepared statements for the session
-
-Educational tool? Show what statements are prepared serverside from queries?
-
-Comparison for prepared statements? custom vs regular (vs raw?)
-"""
-
-
 class StatementTab:
     def __init__(self, master=None, data_service=None):
         self._data_service = data_service
@@ -42,17 +16,18 @@ class StatementTab:
         ttk.Button(master=button_frame, command=self.del_list_item, text='delete').grid(row=0, column=2)
         ttk.Button(master=button_frame, command=self.execute_list_item, text='execute').grid(row=0, column=3)
 
-        self.select_view = tk.Listbox(master=self.frame, selectmode='MULTIPLE')
-        self.select_view.grid(row=2, column=0, sticky='NSEW')
-        ttk.Scrollbar(master=self.frame, command=self.select_view.yview).grid(row=2, column=1, sticky='NSW')
-        # self.frame.rowconfigure(2, weight=5)
-        # self.frame.columnconfigure(0, weight=5)
+        # big/small vars
+        self.scrollable = None
+        self.amount_box = None
+        self.box_container = None
+
+
 
     def refresh_statements(self, event):
         statements = self._data_service.statementtab_fill()
         print(f"{statements=}")
-        self.select_view.delete(0, 'end')
-        self.select_view.insert('end', *statements)
+        #self.select_view.delete(0, 'end')
+        #self.select_view.insert('end', *statements)
 
 
     def edit_list_item(self):
@@ -76,3 +51,56 @@ class StatementTab:
     def _show_generated_values(self, master=None, column_names=None, data=None):
         pass
         # saf
+
+    def _populate_insert_columns_tab(self, new_table: int = None):
+        if new_table is None or not isinstance(new_table, int):
+            return
+
+        column_list = self._data_service.inserttab_fill(table_number=new_table)
+        if not column_list:
+            return
+        for column_data in column_list:
+            self._make_single_row(column_data=column_data)
+        filled_values = self.saved_values.get(self.showing_table, [])
+        if filled_values and any(filled_values):
+            self.amount_box.insert('end', filled_values[0])
+            for val, box in zip(filled_values[1:], self._entry_boxes):
+                box[1].insert('end', val)
+
+
+    def _make_single_row(self, master=None, column_data=None):
+        if not master:
+            master = self.box_container
+
+        ordinal_position = column_data['ordinal_position']
+        small_button_params = {'row': ordinal_position, 'column': 0, 'sticky': 'EW'}
+        big_button_params = {'row': ordinal_position, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
+        datatype_label_params = {'row': ordinal_position, 'column': 1}
+
+        # small button/datatype label area (replaces big button)
+        def expand():
+            smallbutton.grid_forget()
+            datatype_label.grid_forget()
+            bigbutton.grid(big_button_params)
+            self._reset_scrollregion()
+        datatype_label = Label(master=master, text=column_data["data_type"])
+        smallbutton = Button(master=master, text=column_data["column_name"], command=expand)
+        smallbutton.grid(small_button_params)
+        datatype_label.grid(datatype_label_params)
+
+        def shrink():
+            bigbutton.grid_forget()
+            smallbutton.grid(small_button_params)
+            datatype_label.grid(datatype_label_params)
+            self._reset_scrollregion()
+        big_button_text = '\n'.join([f"{key}: {column_data[key]}" for key in column_data.keys()])
+        bigbutton = Button(master=master, text=big_button_text, command=shrink)
+
+        # value box area
+        if not column_data["column_default"]:
+            val_box = Entry(self.box_container)
+            self._entry_boxes.append(val_box)
+        else:
+            # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
+            val_box = Label(master=master, text=column_data["column_default"])
+        val_box.grid(row=ordinal_position, column=2, sticky='EW')
