@@ -1,5 +1,6 @@
 from tkinter import Tk
 import tkinter as tk
+import tkinter.ttk as ttk
 
 from sql_filler.ui.accountFrame import AccountFrame
 from sql_filler.ui.tableFrame import TableFrame
@@ -22,8 +23,18 @@ class UI:
         self._table = TableFrame(master=self.frame, data_service=data_service, work=self._work)
         self._account = AccountFrame(master=self.frame, data_service=data_service, table=self._table)
 
+        self._style()
         self._grid()
         self._layout()
+
+    def _style(self):
+        app_style = ttk.Style()
+        app_style.theme_use('clam')
+        app_style.configure('Container.TFrame', borderwidth=5)
+        # app_style.configure('border', borderwidth=5)
+        # app_style.configure('focus', focuscolor='yellow', focusthickness=5)
+        # app_style.configure('.', font='Symbols Nerd Font')
+        # app_style.configure('.', font='Source Code Pro')
 
     def _grid(self):
         self._main_label.grid(row=0, column=0, columnspan=2)

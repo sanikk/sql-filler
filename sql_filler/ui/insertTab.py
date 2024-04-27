@@ -1,6 +1,7 @@
 from tkinter.ttk import Entry, Button, Treeview, Frame, Scrollbar, Label, LabelFrame
 from tkinter import Canvas, messagebox
 
+from sql_filler.ui.utils import make_scrollable_frame
 
 class InsertTab:
     def __init__(self, master=None, data_service=None):
@@ -13,37 +14,18 @@ class InsertTab:
 
         self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
 
-        self.scrollable = None
         self.amount_box = None
-        self.box_container = None
-        self._make_scrollable_frame()
+
+        self.scrollable, self.box_container = make_scrollable_frame(master=self.frame, row=2, column=1)
+        self.box_container.columnconfigure(0, weight=1)  # big/small button
+        self.box_container.columnconfigure(1, weight=1)  # datatype label
+        self.box_container.columnconfigure(2, weight=1)  # entry box
+        self.controls_box, self.amount_box = self.make_controls_box(master=self.frame)
 
         self._grid()
         self._layout()
 
-    def _make_scrollable_frame(self):
-        scrollbar = Scrollbar(master=self.frame)
-        self.scrollable = Canvas(master=self.frame, yscrollcommand=scrollbar.set)
-        scrollbar.config(command=self.scrollable.yview)
-        self.scrollable.grid(row=2, column=0, sticky='NSEW')
-        scrollbar.grid(row=2, column=1, sticky='NS')
-        self.scrollable.rowconfigure(1, weight=0)
-
-        controls_box = LabelFrame(master=self.frame)
-        Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
-        self.amount_box = Entry(master=controls_box)
-        self.amount_box.grid(row=0, column=1)
-        Button(master=controls_box, text="Generate inserts",
-                                      command=self._generate_insert_statements).grid(row=0, column=2)
-        controls_box.grid(row=1, column=0, columnspan=2)
-        self.box_container = Frame(master=self.scrollable)
-        self.box_container.columnconfigure(0, weight=1)  # big/small button
-        self.box_container.columnconfigure(1, weight=1)  # datatype label
-        self.box_container.columnconfigure(2, weight=1)  # entry box
-
-        self.scrollable.create_window((0, 0), window=self.box_container, anchor='nw')
-
-    def make_control_box(self, master=None):
+    def make_controls_box(self, master=None):
         # got self.frame as master orig..
         controls_box = LabelFrame(master=master)
         Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
@@ -51,10 +33,11 @@ class InsertTab:
         amount_box.grid(row=0, column=1)
         Button(master=controls_box, text="Generate inserts",
                command=self._generate_insert_statements).grid(row=0, column=2)
-        controls_box.grid(row=1, column=0, columnspan=2)
+        return controls_box, amount_box
 
     def _grid(self):
         self.table_label.grid(row=0, column=0, columnspan=2)
+        self.controls_box.grid(row=1, column=0, columnspan=2)
         pass
 
     def _layout(self):
