@@ -75,10 +75,18 @@ class PostgresService:
                 cur.execute(query, [table_name])
                 return cur.fetchall()
 
-    def generate_single_insert(self, table_number, amount, base_strings):
+    def generate_single_insert(self, table_number: int, amount: int, base_strings: list):
+        #for a in base_strings:
+        #    if not self._clean_sql_string(a):
+        #        return False
         strings = [f"{base_strings}{i}" for i in range(1, amount + 1)]
+        if table_number is None or not isinstance(table_number, int) or table_number < 0:
+            return False
         table_name = sql.Identifier(self._runtime_table_list[table_number])
+        if not base_strings:
+            return False
         placeholders = sql.SQL(", ").join(sql.Placeholder() * len(base_strings))
+
         query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
 
         fquery = query.format(
@@ -86,7 +94,12 @@ class PostgresService:
             placeholders=placeholders
         )
         returnable = fquery.as_string(self._get_connection())
-        return returnable
+        self._generated_inserts.append(returnable)
+        print(f"{self._generated_inserts=}")
+        return True
+
+    def get_statement_tab(self):
+        return self._generated_inserts
 
     def insert_generated_data(self):
         sql = """

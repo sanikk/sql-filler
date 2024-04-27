@@ -65,7 +65,7 @@ class InsertTab:
                 self.saved_values[self.showing_table] = values
 
         self.amount_box.delete(0, 'end')
-        self._entry_boxes.clear()
+        self._entry_boxes = [self.amount_box]
         for box in self.box_container.grid_slaves():
             box.destroy()
 
@@ -120,27 +120,26 @@ class InsertTab:
         # value box area
         if not column_data["column_default"]:
             val_box = Entry(self.box_container)
-            self._entry_boxes.append((column_data["ordinal_position"], val_box))
+            self._entry_boxes.append(val_box)
         else:
             # TODO tähän button jossa default tekstinä, painamalla saa kentän johon syöttää arvon
             val_box = Label(master=master, text=column_data["column_default"])
         val_box.grid(row=ordinal_position, column=2, sticky='EW')
 
     def _collect_values(self):
-        amount = self.amount_box.get()
-        values = [a[1].get() for a in self._entry_boxes]
-        return [amount, *values]
+        values = [a.get() for a in self._entry_boxes]
+        return values
 
     def _clean_values(self):
         # TODO make sure user input is cleanish
         pass
 
     def _generate_insert_statements(self):
-        pass
-        # amount, values = self._collect_values()
-        # resp = self._ui.generate_insert_statements(table_number=self.selected_table, amount=amount, base_strings=values)
+        values = self._collect_values()
+        resp = self._data_service.generate_insert_statements(table_number=self.showing_table, values=values)
         # dev thing, we have signal
-        # messagebox.showinfo("generated", resp)
+        print(f"{resp=}")
+        messagebox.showinfo("generated", resp)
 
     def _insert_values(self):
         pass

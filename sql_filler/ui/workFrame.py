@@ -15,6 +15,8 @@ class WorkFrame:
 
     def __init__(self, master=None, data_service=None):
         self.frame = get_container(master=master)
+        self.frame.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
         self.insert_tab = None
         self.statement_tab = None
 
