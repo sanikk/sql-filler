@@ -75,28 +75,31 @@ class PostgresService:
                 cur.execute(query, [table_name])
                 return cur.fetchall()
 
-    def generate_single_insert(self, table_number: int, amount: int, base_strings: list):
-        #for a in base_strings:
-        #    if not self._clean_sql_string(a):
-        #        return False
-        strings = [f"{base_strings}{i}" for i in range(1, amount + 1)]
-        if table_number is None or not isinstance(table_number, int) or table_number < 0:
-            return False
+    def generate_single_insert(self, table_number: int, amount: int, base_strings: list[tuple]):
+        query = self._process_query(table_number=table_number, amount_of_placeholders=len(base_strings))
+        print(f"{query=}")
+        print(f"{base_strings=}")
+        print(f"{query.as_string(self._get_connection())}")
+        strings = self._process_strings(base_strings=base_strings, amount=amount)
+        self._generated_inserts.append((query, strings))
+        print(f"{self._generated_inserts}")
+        return True
+
+    def _process_strings(self, base_strings, amount):
+        filtered_strings = [tupl for tupl in base_strings if tupl[1]]
+        returnable = []
+        for i in range(1, amount + 1):
+            returnable.append([(column_number, re.sub(r',\.', str(3), column_string)) for column_number,column_string in filtered_strings])
+        return returnable
+    def _process_query(self, table_number, amount_of_placeholders):
         table_name = sql.Identifier(self._runtime_table_list[table_number])
-        if not base_strings:
-            return False
-        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(base_strings))
-
-        query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
-
+        placeholders = sql.SQL(", ").join(sql.Placeholder() * amount_of_placeholders)
+        query = sql.SQL('INSERT INTO {table_name} VALUES ( {placeholders} )')
         fquery = query.format(
             table_name=table_name,
             placeholders=placeholders
         )
-        returnable = fquery.as_string(self._get_connection())
-        self._generated_inserts.append(returnable)
-        print(f"{self._generated_inserts=}")
-        return True
+        return fquery
 
     def get_statement_tab(self):
         return self._generated_inserts
