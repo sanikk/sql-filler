@@ -62,13 +62,13 @@ class PostgresService:
         if not table_name or not self._clean_sql_string(table_name):
             return
         query = sql.SQL("""
-        SELECT 
-        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
-        is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
-        FROM information_schema.columns 
-        WHERE table_schema=\'public\' AND table_name=%s 
-        ORDER BY ordinal_position ASC
-        """)
+            SELECT 
+            table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
+            is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+            FROM information_schema.columns 
+            WHERE table_schema=\'public\' AND table_name=%s 
+            ORDER BY ordinal_position ASC
+            """)
 
         with self._get_connection() as conn:
             with conn.cursor() as cur:
@@ -77,12 +77,8 @@ class PostgresService:
 
     def generate_single_insert(self, table_number: int, amount: int, base_strings: list[tuple]):
         query = self._process_query(table_number=table_number, amount_of_placeholders=len(base_strings))
-        print(f"{query=}")
-        print(f"{base_strings=}")
-        print(f"{query.as_string(self._get_connection())}")
         strings = self._process_strings(base_strings=base_strings, amount=amount)
         self._generated_inserts.append((query, strings))
-        print(f"{self._generated_inserts}")
         return True
 
     def _process_strings(self, base_strings, amount):
