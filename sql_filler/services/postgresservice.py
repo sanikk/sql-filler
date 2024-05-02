@@ -89,8 +89,10 @@ class PostgresService:
         filtered_strings = [tupl for tupl in base_strings if tupl[1]]
         returnable = []
         for i in range(1, amount + 1):
-            returnable.append([(column_number, re.sub(r',\.', str(3), column_string)) for column_number,column_string in filtered_strings])
+            returnable.append([(column_number, re.sub(r',\.', str(3), column_string)) for
+                               column_number, column_string in filtered_strings])
         return returnable
+
     def _process_query(self, table_number, amount_of_placeholders):
         table_name = sql.Identifier(self._runtime_table_list[table_number])
         placeholders = sql.SQL(", ").join(sql.Placeholder() * amount_of_placeholders)
@@ -99,10 +101,11 @@ class PostgresService:
             table_name=table_name,
             placeholders=placeholders
         )
+
         return fquery
 
     def get_statement_tab(self):
-        return self._generated_inserts
+        return [(query.as_string(self._get_connection()), values) for query, values in self._generated_inserts]
 
     def insert_generated_data(self):
         sql = """

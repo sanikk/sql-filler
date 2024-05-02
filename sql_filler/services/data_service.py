@@ -53,17 +53,12 @@ class DataService:
             'character_maximum_length': character_maximum_length
         }
 
-    def generate_insert_statements(self, table_number, values: list[str]):
+    def generate_insert_statements(self, table_number: int, amount: int, base_strings: list[tuple]):
         # TODO add foreign key support, so multiple inserts are possible in one generate request. we need right insert
         #  order and stuff
-        amount, *base_strings = values
         if amount:
-            try:
-                amount = int(amount)
-                return self._postgresservice.generate_single_insert(table_number=table_number, amount=amount,
-                                                                    base_strings=base_strings)
-            except ValueError:
-                pass
+            return self._postgresservice.generate_single_insert(table_number=table_number, amount=amount,
+                                                                base_strings=base_strings)
         return False
 
     def _process_input_string(self, input_string):

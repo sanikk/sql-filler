@@ -54,33 +54,33 @@ class StatementTab:
 
     def _populate_statements_tab(self):
         statements_list = self._data_service.statementtab_fill()
-        print(f"{statements_list=}")
-        for i, statement in enumerate(statements_list):
-            self._make_single_row(row=i+1, data=statement)
-            pass
+        for i, (query, values) in enumerate(statements_list):
+            self._make_single_row(master=self.box_container, row=i+1, query=query, values=values)
         self._reset_scrollregion()
 
-    # _make_single_row(master=self.box_container, row=3, statement='statement', label_attr='data_type'
-    def _make_single_row(self, master=None, row=None, data=None):
-        statement_label = Label(master=master, text=data)
-        small_button_params = {'row': row, 'column': 1, 'sticky': 'EW'}
-        big_button_params = {'row': row, 'column': 1, 'columnspan': 2, 'sticky': 'W'}
-        statement_label_label_params = {'row': row, 'column': 1}
+    def _make_single_row(self, master=None, row=None, query=None, values=None):
+        statement_label = Label(master=master, text=query)
+        statement_label.grid(row=row, column=0)
+        value_label = Label(master=master, text=values)
+        value_label.grid(row=row, column=1)
+        #small_button_params = {'row': row, 'column': 1, 'sticky': 'EW'}
+        #big_button_params = {'row': row, 'column': 1, 'columnspan': 2, 'sticky': 'W'}
+        #statement_label_label_params = {'row': row, 'column': 1}
 
         # small button/datatype label area (replaces big button)
-        def expand():
-            smallbutton.grid_forget()
-            bigbutton.grid(big_button_params)
-            self._reset_scrollregion()
-        smallbutton = Button(master=master, text=data["column_name"], command=expand)
-        smallbutton.grid(small_button_params)
+        #def expand():
+        #    smallbutton.grid_forget()
+        #    bigbutton.grid(big_button_params)
+        #    self._reset_scrollregion()
+        #smallbutton = Button(master=master, text=values, command=expand)
+        #smallbutton.grid(small_button_params)
 
-        def shrink():
-            bigbutton.grid_forget()
-            smallbutton.grid(small_button_params)
-            self._reset_scrollregion()
-        big_button_text = '\n'.join([f"{key}: {data[key]}" for key in data.keys()])
-        bigbutton = Button(master=master, text=big_button_text, command=shrink)
+        #def shrink():
+        #    bigbutton.grid_forget()
+        #    smallbutton.grid(small_button_params)
+        #    self._reset_scrollregion()
+        #big_button_text = '\n'.join([f"{key}: {values[key]}" for key in values.keys()])
+        #bigbutton = Button(master=master, text=big_button_text, command=shrink)
 
     def _reset_scrollregion(self):
         self.box_container.update()
