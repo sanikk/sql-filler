@@ -13,6 +13,7 @@ class InsertTab:
 
         self.frame = Frame(master=master)
         self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
+        self.table_label.grid(row=0, column=0, columnspan=2)
 
         self.scrollable = None
         self.box_container = None
@@ -23,6 +24,7 @@ class InsertTab:
 
         self.amount_box = None
         self.controls_box, self.amount_box = self.make_controls_box(master=self.frame)
+        self.controls_box.grid(row=1, column=1)
 
         self._grid()
         self._layout()
@@ -37,13 +39,11 @@ class InsertTab:
         return controls_box, amount_box
 
     def _grid(self):
-        self.table_label.grid(row=0, column=0, columnspan=2)
-        self.controls_box.grid(row=1, column=0, columnspan=2)
         pass
 
     def _layout(self):
-        self.frame.rowconfigure(0, weight=0)
-        self.frame.rowconfigure(2, weight=1)
+        self.frame.rowconfigure(0, weight=0) # table label
+        self.frame.rowconfigure(2, weight=1) # scrollable
         self.frame.columnconfigure(0, weight=1)
         pass
 
