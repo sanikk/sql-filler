@@ -2,7 +2,7 @@ from tkinter import Label, Entry, Button, Frame, EW
 from sql_filler.ui.utils import get_container
 
 
-class AccountFrame:
+class AccountTab:
     # we need filler
     # https://www.postgresql.org/docs/9.0/functions-info.html
     def __init__(self, master=None, data_service=None, table=None):
@@ -80,3 +80,6 @@ class AccountFrame:
         if self._dbname_entry_box and self._username_entry_box:
             return self._dbname_entry_box.get(), self._username_entry_box.get()
         return None, None
+
+    def get_frame(self):
+        return self.frame

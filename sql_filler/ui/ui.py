@@ -2,6 +2,9 @@ from tkinter import Tk
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from sql_filler.ui.accountTab import AccountTab
+from sql_filler.ui.insertTab import InsertTab
+from sql_filler.ui.statementTab import StatementTab
 from sql_filler.ui.accountFrame import AccountFrame
 from sql_filler.ui.tableFrame import TableFrame
 from sql_filler.ui.workFrame import WorkFrame
@@ -18,14 +21,40 @@ class UI:
         self._data_service = data_service
 
         self._main_label = get_main_label(master=self.frame)
+        self._main_label.grid(row=0, column=0, columnspan=2)
 
-        self._work = WorkFrame(master=self.frame, data_service=data_service)
-        self._table = TableFrame(master=self.frame, data_service=data_service, work=self._work)
-        self._account = AccountFrame(master=self.frame, data_service=data_service, table=self._table)
+        self.menu = self.get_menu_bar(self.frame)
+        self.menu.grid(row=1, column=0)
+
+        self.account_tab = None
+        self.statement_tab = None
+
+        # self._work = WorkFrame(master=self.frame, data_service=data_service)
+        # self._table = TableFrame(master=self.frame, data_service=data_service, work=self._work)
+        # self._account = AccountFrame(master=self.frame, data_service=data_service, table=self._table)
 
         # self._style()
-        self._grid()
-        self._layout()
+        # self._grid()
+        # self._layout()
+
+    def get_menu_bar(self, master=None, data_service=None):
+        tab_switcher = ttk.Notebook(master=master)
+        self.account_tab = AccountTab(master=master, data_service=data_service)
+        tab_switcher.add(self.account_tab.get_frame(), text='account tab')
+
+        self.insert_tab = InsertTab(master=master, data_service=data_service)
+        tab_switcher.add(self.insert_tab.get_frame(), text='column data tab')
+
+        self.statement_tab = StatementTab(master=master, data_service=data_service)
+        tab_switcher.add(self.statement_tab.get_frame(), text='statements tab')
+
+        # tab_switcher.add(self.db_info_tab(master=master), text='db info')
+
+        # tab_switcher.add(self.settings_tab(master=master), text='settings')
+
+        return tab_switcher
+
+
 
     def _style(self):
         # TODO not doing anything really just now
