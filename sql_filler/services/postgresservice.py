@@ -62,31 +62,46 @@ class PostgresService:
         if not table_name or not self._clean_sql_string(table_name):
             return
         query = sql.SQL("""
-        SELECT 
-        table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
-        is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
-        FROM information_schema.columns 
-        WHERE table_schema=\'public\' AND table_name=%s 
-        ORDER BY ordinal_position ASC
-        """)
+            SELECT 
+            table_name, CAST(table_name::regclass AS oid) as table_id, column_name, ordinal_position, column_default, 
+            is_nullable, data_type, generation_expression, is_updatable, character_maximum_length 
+            FROM information_schema.columns 
+            WHERE table_schema=\'public\' AND table_name=%s 
+            ORDER BY ordinal_position ASC
+            """)
 
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, [table_name])
                 return cur.fetchall()
 
-    def generate_single_insert(self, table_number, amount, base_strings):
-        strings = [f"{base_strings}{i}" for i in range(1, amount + 1)]
-        table_name = sql.Identifier(self._runtime_table_list[table_number])
-        placeholders = sql.SQL(", ").join(sql.Placeholder() * len(base_strings))
-        query = sql.SQL("INSERT INTO {table_name} VALUES ( {placeholders} )")
+    def generate_single_insert(self, table_number: int, amount: int, base_strings: list[tuple]):
+        query = self._process_query(table_number=table_number, amount_of_placeholders=len(base_strings))
+        strings = self._process_strings(base_strings=base_strings, amount=amount)
+        self._generated_inserts.append((query, strings))
+        return True
 
+    def _process_strings(self, base_strings, amount):
+        filtered_strings = [tupl for tupl in base_strings if tupl[1]]
+        returnable = []
+        for i in range(1, amount + 1):
+            returnable.append([(column_number, re.sub(r',\.', str(3), column_string)) for
+                               column_number, column_string in filtered_strings])
+        return returnable
+
+    def _process_query(self, table_number, amount_of_placeholders):
+        table_name = sql.Identifier(self._runtime_table_list[table_number])
+        placeholders = sql.SQL(", ").join(sql.Placeholder() * amount_of_placeholders)
+        query = sql.SQL('INSERT INTO {table_name} VALUES ( {placeholders} )')
         fquery = query.format(
             table_name=table_name,
             placeholders=placeholders
         )
-        returnable = fquery.as_string(self._get_connection())
-        return returnable
+
+        return fquery
+
+    def get_statement_tab(self):
+        return [(query.as_string(self._get_connection()), values) for query, values in self._generated_inserts]
 
     def insert_generated_data(self):
         sql = """

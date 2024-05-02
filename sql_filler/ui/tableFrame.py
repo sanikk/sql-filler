@@ -6,7 +6,6 @@ from sql_filler.ui.utils import get_container
 class TableFrame:
     # TODO color code status of table. are there generated inserts or filled data.
     def __init__(self, master=None, data_service=None, work=None):
-
         self._data_service = data_service
         self._work = work
 
@@ -40,7 +39,9 @@ class TableFrame:
                 new_table = None
         else:
             # TODO this should not happen. log this
-            print(f"tableFrame switch {new_table=}")
+            print(f"tableFrame switch {new_table=}. Kind of undefined behavior. Figure this out.")
+            # listbox sometimes sends () as tuple
+            new_table = None
         self._work.switch_selected_table(selected=new_table)
 
     def get_selected_table(self) -> int:

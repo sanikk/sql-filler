@@ -1,5 +1,6 @@
 from sql_filler.ui.utils import get_container
 from sql_filler.ui.insertTab import InsertTab
+from sql_filler.ui.statementTab import StatementTab
 import tkinter as tk
 from tkinter import ttk
 
@@ -14,8 +15,10 @@ class WorkFrame:
 
     def __init__(self, master=None, data_service=None):
         self.frame = get_container(master=master)
+        self.frame.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
         self.insert_tab = None
-        self.statements_tab = None
+        self.statement_tab = None
 
         self.menu = self.get_menu_bar(master=self.frame, data_service=data_service)
         self.menu.grid(row=0, column=0)
@@ -24,16 +27,17 @@ class WorkFrame:
         tab_switcher = ttk.Notebook(master=master)
 
         tab_switcher.add(self.table_info_tab(master=master), text='table info')
-        # tab_switcher.add(self.insert_tab(master=master), text='insert data')
+
         self.insert_tab = InsertTab(master=master, data_service=data_service)
         tab_switcher.add(self.insert_tab.get_frame(), text='column data tab')
-        self.statements_tab = StatementsTab(master=master, data_service=data_service)
-        tab_switcher.add(self.statements_tab.get_frame(), text='statements tab')
+
+        self.statement_tab = StatementTab(master=master, data_service=data_service)
+        tab_switcher.add(self.statement_tab.get_frame(), text='statements tab')
+
         tab_switcher.add(self.db_info_tab(master=master), text='db info')
-        # tab_switcher.add(tab, text='text')
+
         tab_switcher.add(self.settings_tab(master=master), text='settings')
 
-        # tab_switcher.add(get_container(text='size', master=master, width=800, height=550))
         return tab_switcher
 
     def settings_tab(self, master=None):
@@ -83,15 +87,3 @@ class WorkFrame:
     # ?
     def discard_generated_values(self):
         self.insert_tab.discard_generated_values()
-
-
-class StatementsTab:
-    def __init__(self, master=None, data_service=None):
-        self._data_service = data_service
-        self.frame = get_container(text="Statements tab", master=master)
-
-    def get_frame(self):
-        return self.frame
-
-    def grid(self):
-        self.frame.grid()
