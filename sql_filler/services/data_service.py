@@ -27,6 +27,9 @@ class DataService:
                 return [self._pretty_insert_tab_result(*result) for result in response]
         return None
 
+    def statementtab_fill(self):
+        return self._postgresservice.get_statement_tab()
+
     def get_table_names(self):
         return self._postgresservice.get_table_names()
 
@@ -50,23 +53,18 @@ class DataService:
             'character_maximum_length': character_maximum_length
         }
 
-    def generate_insert_statements(self, table_number, amount, base_strings):
-        # TODO remove column names, they are for dev purposes. we can use integers.
-        #  10 different allowed characters is about right.
-        return self._postgresservice.generate_single_insert(table_number=table_number, amount=amount,
-                                                            base_strings=base_strings)
-
-
-        # for ordinal_position, value in values:
-            # this if does nothing now. i'm thinking of adding preprocessing here.
-            # if ',.' in value:
-             #    print(f"{value} contains ',.'")
-            # else:
-                # pass
-
+    def generate_insert_statements(self, table_number, values: list[str]):
         # TODO add foreign key support, so multiple inserts are possible in one generate request. we need right insert
         #  order and stuff
-
+        amount, *base_strings = values
+        if amount:
+            try:
+                amount = int(amount)
+                return self._postgresservice.generate_single_insert(table_number=table_number, amount=amount,
+                                                                    base_strings=base_strings)
+            except ValueError:
+                pass
+        return False
 
     def _process_input_string(self, input_string):
         pass
