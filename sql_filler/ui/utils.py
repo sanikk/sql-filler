@@ -24,8 +24,8 @@ def make_scrollable_frame(master=None, row=None, column=None, rowspan=1, columns
     scrollbar = Scrollbar(master=master)
     scrollable = Canvas(master=master, yscrollcommand=scrollbar.set)
     scrollbar.config(command=scrollable.yview)
-    scrollable.grid(row=row, column=column, sticky='NSEW', rowspan=rowspan, columnspan=columnspan)
-    scrollbar.grid(row=row, column=column + 1, sticky='NS', rowspan=rowspan)
+    scrollable.grid(row=row, column=column, sticky='nsew', rowspan=rowspan, columnspan=columnspan)
+    scrollbar.grid(row=row, column=column + 1, sticky='ns', rowspan=rowspan)
     scrollable.rowconfigure(1, weight=0)
 
     box_container = Frame(master=scrollable)

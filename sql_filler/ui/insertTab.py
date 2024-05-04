@@ -30,6 +30,14 @@ class InsertTab:
         self._grid()
         self._layout()
 
+    def _grid(self):
+        self.controls_box.grid(row=0, column=0)
+        self.table_frame.grid(row=1, column=0, sticky='ew')
+
+    def _layout(self):
+        self.frame.rowconfigure(1, weight=1) # scrollable
+        self.frame.columnconfigure(1, weight=1)
+
     def _make_controls_box(self, master=None):
         controls_box = LabelFrame(master=master)
         Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
@@ -38,15 +46,6 @@ class InsertTab:
         Button(master=controls_box, text="Generate inserts",
                command=self._generate_insert_statements).grid(row=1, column=0, columnspan=2)
         return controls_box, amount_box
-
-    def _grid(self):
-        self.controls_box.grid(row=0, column=0)
-        self.table_frame.grid(row=1, column=0, sticky='EW')
-
-    def _layout(self):
-        self.frame.rowconfigure(0, weight=0) # table label
-        self.frame.rowconfigure(2, weight=1) # scrollable
-        self.frame.columnconfigure(0, weight=1)
 
     def switch_selected_table(self, selected: int):
         """

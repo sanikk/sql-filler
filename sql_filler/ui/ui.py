@@ -28,17 +28,6 @@ class UI:
         self._grid()
         self._layout()
 
-    def tab_change_chores_old(self, event):
-        selected_tab = event.widget.index(event.widget.select())
-        # if selected_tab == 0:
-            # account tab
-        if selected_tab == 1:
-            # insert tab
-            self._insert_tab.refresh_tables()
-        if selected_tab == 2:
-            # statement tab
-            self._statement_tab.refresh_statements()
-
     def tab_change_chores(self, event):
         selected_tab = event.widget.tab(event.widget.select(), 'text')
         if selected_tab == 'generate inserts':
@@ -74,7 +63,7 @@ class UI:
     #
     def _grid(self):
         self._main_label.grid(row=0, column=0, columnspan=1)
-        self._menu.grid(row=1, column=0)
+        self._menu.grid(row=1, column=0, sticky='NSEW')
 
     def _layout(self):
         self.frame.rowconfigure(1, weight=1)
