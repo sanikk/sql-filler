@@ -3,9 +3,11 @@
 title: connect, account knows table, table knows work
 ---
 sequenceDiagram
-    Account->>Data_service: connect(username, dbname) & disconnect()
-    Data_service-->>Account: True/False
-    Account->>Table: update_tables()
+    AccountTab->>Data_service: connect(username, dbname) & disconnect()
+    Data_service-->>AccountTab: True/False
+    AccountTab->> UI: do_connection_chores()
+    UI->> InsertTab: update_tables()
+    InsertTab->>TableFrame: update_tables()
 ```
 
 ```mermaid
