@@ -1,71 +1,84 @@
 from tkinter import Tk
-import tkinter as tk
-import tkinter.ttk as ttk
+from tkinter.ttk import Notebook
 
-from sql_filler.ui.accountFrame import AccountFrame
-from sql_filler.ui.tableFrame import TableFrame
-from sql_filler.ui.workFrame import WorkFrame
+from sql_filler.ui.accountTab import AccountTab
+from sql_filler.ui.insertTab import InsertTab
+from sql_filler.ui.statementTab import StatementTab
 
 from sql_filler.ui.utils import get_main_label
 
 
 class UI:
     def __init__(self, master=None, data_service=None):
+        self._data_service = data_service
+
         self.frame = Tk()
         self.frame.geometry('800x600')
         self.frame.title('SQL Filler')
-
-        self._data_service = data_service
-
         self._main_label = get_main_label(master=self.frame)
 
-        self._work = WorkFrame(master=self.frame, data_service=data_service)
-        self._table = TableFrame(master=self.frame, data_service=data_service, work=self._work)
-        self._account = AccountFrame(master=self.frame, data_service=data_service, table=self._table)
+        self._insert_tab = None
+        self._account_tab = None
+        self._statement_tab = None
+
+        self._menu = self.get_menu_bar(master=self.frame, data_service=data_service)
+        self._menu.bind('<<NotebookTabChanged>>', self.tab_change_chores)
 
         # self._style()
         self._grid()
         self._layout()
 
-    def _style(self):
-        # TODO not doing anything really just now
-        app_style = ttk.Style()
-        app_style.theme_use('clam')
-        app_style.configure('Container.TFrame', borderwidth=5)
-        # app_style.configure('border', borderwidth=5)
-        # app_style.configure('focus', focuscolor='yellow', focusthickness=5)
-        # app_style.configure('.', font='Symbols Nerd Font')
-        # app_style.configure('.', font='Source Code Pro')
+    def tab_change_chores_old(self, event):
+        selected_tab = event.widget.index(event.widget.select())
+        # if selected_tab == 0:
+            # account tab
+        if selected_tab == 1:
+            # insert tab
+            self._insert_tab.refresh_tables()
+        if selected_tab == 2:
+            # statement tab
+            self._statement_tab.refresh_statements()
 
+    def tab_change_chores(self, event):
+        selected_tab = event.widget.tab(event.widget.select(), 'text')
+        if selected_tab == 'generate inserts':
+            self._insert_tab.refresh_tables()
+        if selected_tab == 'prepared inserts':
+            self._statement_tab.refresh_statements()
+
+    def get_menu_bar(self, master=None, data_service=None):
+        tab_switcher = Notebook(master=master)
+
+        self._insert_tab = InsertTab(master=master, data_service=data_service)
+        self._account_tab = AccountTab(master=master, data_service=data_service)
+        tab_switcher.add(self._account_tab.get_frame(), text='account')
+
+        tab_switcher.add(self._insert_tab.get_frame(), text='generate inserts')
+
+        self._statement_tab = StatementTab(master=master, data_service=data_service)
+        tab_switcher.add(self._statement_tab.get_frame(), text='prepared inserts')
+
+        # tab_switcher.add(self.db_info_tab(master=master), text='db info')
+        # tab_switcher.add(self.settings_tab(master=master), text='settings')
+        return tab_switcher
+
+    # def _style(self):
+    #     # TODO not doing anything really just now
+    #     app_style = ttk.Style()
+    #     app_style.theme_use('clam')
+    #     app_style.configure('Container.TFrame', borderwidth=5)
+    #     # app_style.configure('border', borderwidth=5)
+    #     # app_style.configure('focus', focuscolor='yellow', focusthickness=5)
+    #     # app_style.configure('.', font='Symbols Nerd Font')
+    #     # app_style.configure('.', font='Source Code Pro')
+    #
     def _grid(self):
-        self._main_label.grid(row=0, column=0, columnspan=2)
-        self._account.grid(row=1, column=0, sticky=tk.E+tk.W+tk.N+tk.S)
-        self._table.grid(row=2, column=0, sticky=tk.N+tk.E)
-        self._work.grid(row=1, column=1, rowspan=2)
+        self._main_label.grid(row=0, column=0, columnspan=1)
+        self._menu.grid(row=1, column=0)
 
     def _layout(self):
-        self.frame.columnconfigure(index=0, weight=0)
-        self.frame.columnconfigure(index=1, weight=0)
-        self.frame.rowconfigure(0, weight=0)
-        self.frame.rowconfigure(index=1, weight=0)
-        self.frame.rowconfigure(index=2, weight=0)
-
-    def generate_insert_statements(self, table_number, amount, base_strings):
-        """
-        This should be useful here. We need to update another frame in workFrame.
-
-        """
-        return self._data_service.generate_insert_statements(table_number=table_number, amount=amount,
-                                                             base_strings=base_strings)
-
-    def discard_generated_values(self):
-        """
-        Probably not needed here. Put this in the generated_values tab.
-
-        :return:
-        """
-        self._data_service.discard_generated_values()
-        self._work.discard_generated_values()
+        self.frame.rowconfigure(1, weight=1)
+        self.frame.columnconfigure(0, weight=1)
 
     # passthrough function for main.py so far
     def mainloop(self):

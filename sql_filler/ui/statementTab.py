@@ -8,7 +8,6 @@ class StatementTab:
     def __init__(self, master=None, data_service=None):
         self._data_service = data_service
         self.frame = get_container(text="Statements tab", master=master)
-        self.frame.bind('<Map>', self.refresh_statements)
 
         button_frame = ttk.LabelFrame(master=self.frame)
         button_frame.grid(row=1, column=0)
@@ -22,7 +21,7 @@ class StatementTab:
         self.scrollable = scrollable
         self.box_container = box_container
 
-    def refresh_statements(self, event):
+    def refresh_statements(self):
         self._clear_statements_view()
         self._populate_statements_tab()
 
