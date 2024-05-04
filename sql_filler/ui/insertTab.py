@@ -1,53 +1,55 @@
 from tkinter.ttk import Entry, Button, Frame, Label, LabelFrame
 from tkinter import messagebox
 
+from sql_filler.ui.tableFrame import TableFrame
 from sql_filler.ui.utils import make_scrollable_frame
 
 
 class InsertTab:
-    def __init__(self, master=None, data_service=None):
+    def __init__(self, master=None, data_service=None, ui=None):
         self._data_service = data_service
+        self._ui = ui
+
         self._entry_boxes = []
         self.saved_values = {}
         self.showing_table = None
 
         self.frame = Frame(master=master)
-        self.table_label = Label(master=self.frame, text="No table selected", font="Calibri 22", foreground='cyan')
-        self.table_label.grid(row=0, column=0, columnspan=2)
+
+        self.controls_box = None
+        self.amount_box = None
+        self.controls_box, self.amount_box = self._make_controls_box(master=self.frame)
+        self.table_frame = TableFrame(master=self.frame, data_service=data_service, insert_tab=self)
 
         self.scrollable = None
         self.box_container = None
-        self.scrollable, self.box_container = make_scrollable_frame(master=self.frame, row=2, column=1)
+        self.scrollable, self.box_container = make_scrollable_frame(master=self.frame, row=0, column=1, rowspan=2)
         self.box_container.columnconfigure(0, weight=1)  # big/small button
         self.box_container.columnconfigure(1, weight=1)  # datatype label
         self.box_container.columnconfigure(2, weight=1)  # entry box
 
-        self.amount_box = None
-        self.controls_box, self.amount_box = self.make_controls_box(master=self.frame)
-        self.controls_box.grid(row=1, column=1)
-
         self._grid()
         self._layout()
 
-    def make_controls_box(self, master=None):
+    def _make_controls_box(self, master=None):
         controls_box = LabelFrame(master=master)
         Label(master=controls_box, text="Amount").grid(row=0, column=0, sticky='E')
         amount_box = Entry(master=controls_box)
         amount_box.grid(row=0, column=1)
         Button(master=controls_box, text="Generate inserts",
-               command=self._generate_insert_statements).grid(row=0, column=2)
+               command=self._generate_insert_statements).grid(row=1, column=0, columnspan=2)
         return controls_box, amount_box
 
     def _grid(self):
-        pass
+        self.controls_box.grid(row=0, column=0)
+        self.table_frame.grid(row=1, column=0, sticky='EW')
 
     def _layout(self):
         self.frame.rowconfigure(0, weight=0) # table label
         self.frame.rowconfigure(2, weight=1) # scrollable
         self.frame.columnconfigure(0, weight=1)
-        pass
 
-    def switch_selected_table(self, new_selected_table: int):
+    def switch_selected_table(self, selected: int):
         """
         Public function to switch db table shown in this tab.
 
@@ -64,9 +66,9 @@ class InsertTab:
         for box in self.box_container.grid_slaves():
             box.destroy()
 
-        self.showing_table = new_selected_table
-        if new_selected_table is not None:
-            self._populate_insert_columns_tab(new_table=new_selected_table)
+        self.showing_table = selected
+        if selected is not None:
+            self._populate_insert_columns_tab(new_table=selected)
         self._reset_scrollregion()
 
     def _get_amount(self):
@@ -78,15 +80,16 @@ class InsertTab:
                 amount = 0
         return amount
 
-    def _populate_insert_columns_tab(self, new_table: int = None):
+    def _populate_insert_columns_tab(self, master=None, new_table: int = None):
+        if not master:
+            master = self.box_container
         if not isinstance(new_table, int):
             return
-
         column_list = self._data_service.inserttab_fill(table_number=new_table)
         if not column_list:
             return
         for column_data in column_list:
-            self._make_single_row(column_data=column_data)
+            self._make_single_row(master=master, column_data=column_data)
         self._fill_values_from_storage()
 
     def _fill_values_from_storage(self):
@@ -96,11 +99,7 @@ class InsertTab:
             for val, box in zip(filled_values[1:], self._entry_boxes):
                 box[1].insert('end', val)
 
-
     def _make_single_row(self, master=None, column_data=None):
-        if not master:
-            master = self.box_container
-
         column_number = column_data['ordinal_position']
         small_button_params = {'row': column_number, 'column': 0, 'sticky': 'EW'}
         big_button_params = {'row': column_number, 'column': 0, 'columnspan': 2, 'sticky': 'W'}
@@ -144,15 +143,18 @@ class InsertTab:
 
     def _generate_insert_statements(self):
         raw_amount = self.amount_box.get()
+        amount = 0
         if raw_amount:
             try:
                 amount = int(raw_amount)
             except ValueError:
-                amount = 0
+                return
         base_strings = self._collect_values()
         resp = self._data_service.generate_insert_statements(table_number=self.showing_table, amount=amount,
                                                              base_strings=base_strings)
         # TODO we need better feedback to user
+        if resp:
+            self._ui.update_statements()
         messagebox.showinfo("generated", str(resp))
 
     def get_frame(self):
@@ -164,6 +166,9 @@ class InsertTab:
         :return: tkinter.ttk.Frame
         """
         return self.frame
+
+    def update_tables(self):
+        self.table_frame.update_tables()
 
     def _reset_scrollregion(self):
         self.box_container.update()

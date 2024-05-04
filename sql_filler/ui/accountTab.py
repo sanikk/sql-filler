@@ -4,44 +4,34 @@ from tkinter.ttk import Label, Entry, Button, Frame, LabelFrame
 class AccountTab:
     # we need filler
     # https://www.postgresql.org/docs/9.0/functions-info.html
-    def __init__(self, master=None, data_service=None, ui=None):
-        self.frame = Frame(master=master)
-        self._username_entry_box = None
-        self._database_entry_box = None
-        self.unconnected_box = self.unconnected(master=self.frame)
-        self.unconnected_box.grid(row=1, column=0, rowspan=2)
-
-        Button(master=self.frame, text="Connect", command=self.connect).grid(row=1, column=1, sticky='EW')
-        self.disconnector = Button(master=self.frame, text="Disconnect", command=self.disconnect,
-                                   state='disabled')
-
-        self.disconnector.grid(row=2, column=1, sticky='EW')
-
+    def __init__(self, master=None, data_service=None, insert_tab=None):
         self._data_service = data_service
-        self._ui = ui
+        self._insert_tab = insert_tab
 
-    def unconnected(self, master=None):
-        connected_box = LabelFrame(master=self.frame)
-        Label(master=connected_box, text="Username").grid(row=1, column=0)
-        self._username_entry_box = Entry(master=connected_box)
+        self.frame = Frame(master=master)
+
+        Label(master=self.frame, text="Username").grid(row=1, column=0)
+        self._username_entry_box = Entry(master=self.frame)
         self._username_entry_box.grid(row=2, column=0)
 
-        Label(master=connected_box, text="Database name").grid(row=3, column=0)
-        self._dbname_entry_box = Entry(master=connected_box)
+        Label(master=self.frame, text="Database name").grid(row=3, column=0)
+        self._dbname_entry_box = Entry(master=self.frame)
         self._dbname_entry_box.grid(row=4, column=0)
-        return connected_box
+
+        Button(master=self.frame, text="Connect", command=self.connect).grid(row=1, column=1, sticky='EW', rowspan=2)
+        self.disconnect_button = Button(master=self.frame, text="Disconnect", command=self.disconnect,
+                                    state='disabled')
+        self.disconnect_button.grid(row=3, column=1, sticky='EW', rowspan=2)
 
     def connect(self):
         dbname, username = self.get_entry_values()
-
         if dbname and username and self._data_service.account_new(dbname, username):
-            self._ui.set_tabs_state('normal')
-            self.disconnector.configure(state='normal')
+            self.disconnect_button.configure(state='normal')
+            self._insert_tab.update_tables()
 
     def disconnect(self):
         self._data_service.account_close()
-        self._ui.set_tabs_state('disabled')
-        self.disconnector.configure(state='disabled')
+        self.disconnect_button.configure(state='disabled')
 
     def grid(self, row, column, sticky):
         """

@@ -15,8 +15,11 @@ class PostgresService:
     # public methods
     # Connection
     def first_connection(self, dbname=None, username=None):
-        if self._test_connection(dbname=dbname, username=username):
-            return True
+        if self._clean_sql_string(dbname) and self._clean_sql_string(username):
+            if test_connection(dbname=dbname, username=username):
+                self._dbname = dbname
+                self._username = username
+                return True
         return False
 
     def disconnect(self):
@@ -69,7 +72,6 @@ class PostgresService:
             WHERE table_schema=\'public\' AND table_name=%s 
             ORDER BY ordinal_position ASC
             """)
-
         with self._get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, [table_name])
@@ -97,14 +99,13 @@ class PostgresService:
             table_name=table_name,
             placeholders=placeholders
         )
-
         return fquery
 
     def get_statement_tab(self):
         return [(query.as_string(self._get_connection()), values) for query, values in self._generated_inserts]
 
     def insert_generated_data(self):
-        sql = """
+        query = """
             RETURNING id
         """
         pass
@@ -113,14 +114,6 @@ class PostgresService:
         return ''
 
     # internal methods
-
-    def _test_connection(self, dbname=None, username=None):
-        if test_connection(dbname=dbname, username=username):
-            self._dbname = dbname
-            self._username = username
-            return True
-        return False
-
     def _get_connection(self):
         if self._dbname and self._username:
             return get_connection(dbname=self._dbname, username=self._username)

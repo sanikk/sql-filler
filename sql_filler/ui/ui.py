@@ -1,6 +1,5 @@
 from tkinter import Tk
-import tkinter as tk
-import tkinter.ttk as ttk
+from tkinter.ttk import Notebook
 
 from sql_filler.ui.accountTab import AccountTab
 from sql_filler.ui.insertTab import InsertTab
@@ -34,17 +33,16 @@ class UI:
         # self._layout()
 
     def get_menu_bar(self, master=None, data_service=None):
-
-        tab_switcher = ttk.Notebook(master=master)
-
-        self.account_tab = AccountTab(master=master, data_service=data_service, ui=self)
-        tab_switcher.add(self.account_tab.get_frame(), text='account tab')
+        tab_switcher = Notebook(master=master)
 
         self.insert_tab = InsertTab(master=master, data_service=data_service)
-        tab_switcher.add(self.insert_tab.get_frame(), text='column data tab', state='disabled')
+        self.account_tab = AccountTab(master=master, data_service=data_service, insert_tab=self.insert_tab)
+        tab_switcher.add(self.account_tab.get_frame(), text='account tab')
+
+        tab_switcher.add(self.insert_tab.get_frame(), text='column data tab')
 
         self.statement_tab = StatementTab(master=master, data_service=data_service)
-        tab_switcher.add(self.statement_tab.get_frame(), text='statements tab', state='disabled')
+        tab_switcher.add(self.statement_tab.get_frame(), text='statements tab')
 
         # tab_switcher.add(self.db_info_tab(master=master), text='db info')
 
@@ -52,9 +50,8 @@ class UI:
 
         return tab_switcher
 
-    def set_tabs_state(self, state):
-        for tab in self.menu.tabs()[1:]:
-            self.menu.tab(tab, state=state)
+    def update_statements(self):
+        self.statement_tab.refresh_statements()
 
     # def _style(self):
     #     # TODO not doing anything really just now
@@ -87,15 +84,6 @@ class UI:
     #     return self._data_service.generate_insert_statements(table_number=table_number, amount=amount,
     #                                                          base_strings=base_strings)
     #
-    # def discard_generated_values(self):
-    #     """
-    #     Probably not needed here. Put this in the generated_values tab.
-    #
-    #     :return:
-    #     """
-    #     self._data_service.discard_generated_values()
-    #     self._work.discard_generated_values()
-
     # passthrough function for main.py so far
     def mainloop(self):
         self.frame.mainloop()
