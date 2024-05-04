@@ -6,9 +6,8 @@ from sql_filler.ui.utils import make_scrollable_frame
 
 
 class InsertTab:
-    def __init__(self, master=None, data_service=None, ui=None):
+    def __init__(self, master=None, data_service=None):
         self._data_service = data_service
-        self._ui = ui
 
         self._entry_boxes = []
         self.saved_values = {}
@@ -153,9 +152,9 @@ class InsertTab:
         resp = self._data_service.generate_insert_statements(table_number=self.showing_table, amount=amount,
                                                              base_strings=base_strings)
         # TODO we need better feedback to user
+        print(f"{resp=}")
         if resp:
-            self._ui.update_statements()
-        messagebox.showinfo("generated", str(resp))
+            messagebox.showinfo("generated", str(resp))
 
     def get_frame(self):
         """
@@ -167,8 +166,8 @@ class InsertTab:
         """
         return self.frame
 
-    def update_tables(self):
-        self.table_frame.update_tables()
+    def refresh_tables(self):
+        self.table_frame.refresh_tables()
 
     def _reset_scrollregion(self):
         self.box_container.update()

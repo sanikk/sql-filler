@@ -4,9 +4,8 @@ from tkinter.ttk import Label, Entry, Button, Frame, LabelFrame
 class AccountTab:
     # we need filler
     # https://www.postgresql.org/docs/9.0/functions-info.html
-    def __init__(self, master=None, data_service=None, insert_tab=None):
+    def __init__(self, master=None, data_service=None):
         self._data_service = data_service
-        self._insert_tab = insert_tab
 
         self.frame = Frame(master=master)
 
@@ -25,9 +24,9 @@ class AccountTab:
 
     def connect(self):
         dbname, username = self.get_entry_values()
+
         if dbname and username and self._data_service.account_new(dbname, username):
             self.disconnect_button.configure(state='normal')
-            self._insert_tab.update_tables()
 
     def disconnect(self):
         self._data_service.account_close()

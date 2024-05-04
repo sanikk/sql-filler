@@ -15,7 +15,7 @@ class TableFrame:
         Scrollbar(self.frame, command=self.lb.yview).grid(row=0, column=1, sticky='NSW')
         self.lb.grid(row=0, column=0)
 
-    def update_tables(self):
+    def refresh_tables(self):
         self.lb.delete(0, 'end')
         content = self._data_service.get_table_names()
         if content:
