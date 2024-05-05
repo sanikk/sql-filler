@@ -5,6 +5,7 @@ from sql_filler.ui.tableFrame import TableFrame
 from sql_filler.ui.utils import make_scrollable_frame
 
 
+# TODO something wrong with saved values. The first field gets filled with spam.
 class InsertTab:
     def __init__(self, master=None, data_service=None):
         self._data_service = data_service
@@ -53,21 +54,36 @@ class InsertTab:
 
         :return: None
         """
-        if self.showing_table is not None:
-            amount = self.amount_box.get()
-            values = self._collect_values()
-            if any(values):
-                self.saved_values[self.showing_table] = (amount, values)
+        self._save_filled_values()
 
-        self.amount_box.delete(0, 'end')
-        self._entry_boxes = []
-        for box in self.box_container.grid_slaves():
-            box.destroy()
+        self._clear_box_container()
 
         self.showing_table = selected
         if selected is not None:
             self._populate_insert_columns_tab(new_table=selected)
         self._reset_scrollregion()
+
+    def _save_filled_values(self):
+        if self.showing_table is not None:
+            amount = self.amount_box.get()
+            values = self._collect_values()
+            print(f"{values=}, {amount=}, {self.showing_table=}")
+            if any(values):
+                self.saved_values[self.showing_table] = (amount, values)
+                print(f"{self.saved_values=}")
+
+    def _load_filled_values(self):
+        filled_values = self.saved_values.get(self.showing_table, [])
+        if filled_values and any(filled_values):
+            self.amount_box.insert('end', filled_values[0])
+            for val, box in zip(filled_values[1:], self._entry_boxes):
+                box[1].insert('end', val)
+
+    def _clear_box_container(self):
+        self.amount_box.delete(0, 'end')
+        self._entry_boxes = []
+        for box in self.box_container.grid_slaves():
+            box.destroy()
 
     def _get_amount(self):
         amount = self.amount_box.get()
@@ -90,12 +106,6 @@ class InsertTab:
             self._make_single_row(master=master, column_data=column_data)
         self._fill_values_from_storage()
 
-    def _fill_values_from_storage(self):
-        filled_values = self.saved_values.get(self.showing_table, [])
-        if filled_values and any(filled_values):
-            self.amount_box.insert('end', filled_values[0])
-            for val, box in zip(filled_values[1:], self._entry_boxes):
-                box[1].insert('end', val)
 
     def _make_single_row(self, master=None, column_data=None):
         column_number = column_data['ordinal_position']
@@ -151,7 +161,6 @@ class InsertTab:
         resp = self._data_service.generate_insert_statements(table_number=self.showing_table, amount=amount,
                                                              base_strings=base_strings)
         # TODO we need better feedback to user
-        print(f"{resp=}")
         if resp:
             messagebox.showinfo("generated", str(resp))
 
